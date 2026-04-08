@@ -507,7 +507,10 @@
                     throw new Error(err.error?.message || 'API Error');
                 }
 
-                // Stream Processing
+                // Get model ID from headers
+                const modelId = res.headers.get('x-model-id');
+
+                // Stream Processing - Fixed SSE parsing
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
@@ -519,29 +522,36 @@
 
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
-                    buffer = lines.pop() || '';
+                    buffer = lines.pop() || ''; // Keep last incomplete line
 
                     for (const line of lines) {
-                        if (line.startsWith(' ')) {
-                            const data = line.slice(6);
+                        const trimmed = line.trim();
+                        // Fix: Correct SSE event parsing
+                        if (trimmed.startsWith(' ')) {
+                            const data = trimmed.slice(6); // Remove ' ' prefix
                             if (data === '[DONE]') continue;
                             try {
                                 const parsed = JSON.parse(data);
                                 const chunk = parsed.choices?.[0]?.delta?.content || '';
-                                content += chunk;
-                                updateBotMessage(botEl, content, true);
-                            } catch (e) { /* ignore parse errors */ }
+                                if (chunk) {
+                                    content += chunk;
+                                    updateBotMessage(botEl, content, true, modelId);
+                                }
+                            } catch (e) {
+                                console.warn('JSON parse error:', e);
+                            }
                         }
                     }
                 }
                 
                 // Finalize
-                updateBotMessage(botEl, content, false, res.headers.get('x-model-id'));
+                updateBotMessage(botEl, content, false, modelId);
                 state.messages.push({ role: 'assistant', content: content });
                 
             } catch (err) {
                 if (err.name !== 'AbortError') {
-                    updateBotMessage(botEl, `⚠️ ${err.message}`, false);
+                    console.error('Chat error:', err);
+                    updateBotMessage(botEl, `⚠️ Error: ${err.message}`, false);
                 } else {
                     updateBotMessage(botEl, 'Generation stopped.', false);
                 }
