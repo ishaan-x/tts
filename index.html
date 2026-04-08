@@ -1,732 +1,385 @@
+
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Chat Assistant</title>
-    <!-- Tailwind CSS -->
+    <title>OpenRouter AI Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js for Markdown -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Highlight.js for Code Blocks -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light-theme">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        primaryHover: '#4f46e5',
-                        bgLight: '#f8fafc',
-                        bgDark: '#0f172a',
-                        surfaceLight: '#ffffff',
-                        surfaceDark: '#1e293b',
-                        textLight: '#0f172a',
-                        textDark: '#f8fafc',
-                        mutedLight: '#64748b',
-                        mutedDark: '#94a3b8',
-                        borderLight: '#e2e8f0',
-                        borderDark: '#334155',
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'fade-in': 'fadeIn 0.3s ease-out forwards',
-                        'slide-up': 'slideUp 0.3s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(5px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <style>
-        /* Fix for mobile browser bars */
+        :root {
+            --color-bg: 255, 255, 255;
+            --color-text: 17, 24, 39;
+            --color-primary: 59, 130, 246;
+        }
+        .dark {
+            --color-bg: 31, 41, 55;
+            --color-text: 226, 232, 240;
+        }
         body {
-            height: 100dvh; /* Dynamic viewport height */
-            height: -webkit-fill-available; /* iOS Safari fix */
+            background-color: rgb(var(--color-bg));
+            color: rgb(var(--color-text));
+            min-height: 100dvh;
         }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-        
-        /* Markdown Styles */
-        .prose pre {
-            background-color: #0f172a;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            padding: 0;
-            overflow: hidden;
+        .markdown-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .dark .prose pre { border: 1px solid #334155; }
-        .prose code { font-family: 'Fira Code', monospace; font-size: 0.9em; }
-        .code-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #1e293b; color: #94a3b8; padding: 0.25rem 1rem;
-            font-size: 0.75rem; border-bottom: 1px solid #334155;
+        pre code.hljs {
+            display: block;
+            overflow-x: auto;
+            padding: 1em;
+            background: #2d3748;
+            border-radius: 0.375rem;
         }
-        .dark .code-header { background: #111827; border-bottom-color: #374151; }
-        .prose pre code {
-            background: transparent; padding: 1rem; display: block; overflow-x: auto;
+        #chat-container {
+            max-height: calc(100dvh - 12rem);
+            overflow-y: auto;
+            scrollbar-gutter: stable;
         }
-        
-        /* Typing Cursor */
-        .typing-cursor::after {
-            content: '▋'; display: inline-block; animation: blink 1s step-end infinite;
-            color: #6366f1; margin-left: 2px; vertical-align: baseline;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* Modal Transitions */
-        .modal-backdrop { transition: opacity 0.2s; }
-        .modal-panel { transition: transform 0.2s, opacity 0.2s; }
-        .hidden-modal { opacity: 0; pointer-events: none; }
-        .hidden-modal .modal-panel { transform: scale(0.95); opacity: 0; }
-        
-        /* Selection styling */
-        ::selection { background-color: #6366f1; color: white; }
     </style>
 </head>
-<body class="bg-bgLight text-textLight dark:bg-bgDark dark:text-textDark flex flex-col overflow-hidden transition-colors duration-200">
+<body class="antialiased">
+    <div class="max-w-3xl mx-auto p-4">
+        <header class="flex justify-between items-center mb-4">
+            <h1 class="text-xl font-bold">OpenRouter AI Chat</h1>
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+                <button id="settings-toggle" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.754 2.924-1.754 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.754.426 1.754 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.754-2.924 1.754-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.754-.426-1.754-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-    <!-- Header -->
-    <header class="flex-none h-16 border-b border-borderLight dark:border-borderDark bg-surfaceLight/80 dark:bg-surfaceDark/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
-        <div class="flex items-center gap-3 overflow-hidden">
-            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <div class="flex flex-col">
-                <h1 class="font-bold text-base leading-none truncate">AI Assistant</h1>
-                <span id="status-indicator" class="text-xs text-mutedLight dark:text-mutedDark truncate">Loading models...</span>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-2 ml-2">
-            <!-- Model Selector (Desktop) -->
-            <div class="relative hidden md:block">
-                <select id="model-select" class="appearance-none bg-transparent border border-borderLight dark:border-borderDark text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
-                    <option value="" disabled>Loading...</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-mutedLight">
-                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </div>
-
-            <button id="theme-btn" class="p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 text-mutedLight dark:text-mutedDark transition-colors" title="Toggle Theme">
-                <svg id="moon-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-            <button id="settings-btn" class="p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 text-mutedLight dark:text-mutedDark transition-colors" title="Settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- Mobile Model Selector (Shown below header on small screens) -->
-    <div id="mobile-model-bar" class="flex-none md:hidden px-4 py-2 bg-surfaceLight dark:bg-surfaceDark border-b border-borderLight dark:border-borderDark">
-        <select id="mobile-model-select" class="w-full appearance-none bg-bgLight dark:bg-bgDark border border-borderLight dark:border-borderDark text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
-            <option value="" disabled>Loading...</option>
-        </select>
-    </div>
-
-    <!-- Chat Container -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-h-0">
-        <!-- Welcome Message -->
-        <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-primary/25">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <h2 class="text-2xl font-bold mb-2">How can I help you today?</h2>
-            <p class="text-mutedLight dark:text-mutedDark max-w-md mb-8">I'm your AI assistant. I can help with writing, coding, analysis, and more.</p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
-                <button class="suggestion-btn text-left p-4 rounded-xl border border-borderLight dark:border-borderDark hover:border-primary dark:hover:border-primary bg-surfaceLight dark:bg-surfaceDark transition-all group" data-prompt="Explain quantum computing in simple terms">
-                    <div class="font-medium text-sm group-hover:text-primary mb-1">Explain concepts</div>
-                    <div class="text-xs text-mutedLight dark:text-mutedDark">Quantum computing basics</div>
-                </button>
-                <button class="suggestion-btn text-left p-4 rounded-xl border border-borderLight dark:border-borderDark hover:border-primary dark:hover:border-primary bg-surfaceLight dark:bg-surfaceDark transition-all group" data-prompt="Write a Python script to scrape a website">
-                    <div class="font-medium text-sm group-hover:text-primary mb-1">Code assistance</div>
-                    <div class="text-xs text-mutedLight dark:text-mutedDark">Python web scraper</div>
-                </button>
-                <button class="suggestion-btn text-left p-4 rounded-xl border border-borderLight dark:border-borderDark hover:border-primary dark:hover:border-primary bg-surfaceLight dark:bg-surfaceDark transition-all group" data-prompt="Draft a professional email to reschedule a meeting">
-                    <div class="font-medium text-sm group-hover:text-primary mb-1">Drafting</div>
-                    <div class="text-xs text-mutedLight dark:text-mutedDark">Reschedule meeting email</div>
-                </button>
-                <button class="suggestion-btn text-left p-4 rounded-xl border border-borderLight dark:border-borderDark hover:border-primary dark:hover:border-primary bg-surfaceLight dark:bg-surfaceDark transition-all group" data-prompt="Help me brainstorm gift ideas for a friend who loves hiking">
-                    <div class="font-medium text-sm group-hover:text-primary mb-1">Brainstorming</div>
-                    <div class="text-xs text-mutedLight dark:text-mutedDark">Gift ideas for hikers</div>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Input Area -->
-    <footer class="flex-none p-4 bg-surfaceLight/80 dark:bg-surfaceDark/80 backdrop-blur-md border-t border-borderLight dark:border-borderDark z-10">
-        <div class="max-w-3xl mx-auto relative flex items-end gap-2 bg-bgLight dark:bg-bgDark rounded-2xl p-2 border border-borderLight dark:border-borderDark focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
-            <textarea id="user-input" rows="1" placeholder="Type your message..." class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-2.5 px-3 max-h-32 min-h-[40px] text-textLight dark:text-textDark placeholder:text-mutedLight/50"></textarea>
-            <div class="flex items-center gap-1 pb-1 pr-1">
-                <button id="stop-btn" class="hidden p-2 rounded-lg bg-red-100/50 dark:bg-red-900/20 text-red-500 hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors" title="Stop">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                </button>
-                <button id="send-btn" class="p-2 rounded-lg bg-primary hover:bg-primaryHover text-white shadow-md shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
-            </div>
-        </div>
-        <div class="text-center mt-2 text-[10px] text-mutedLight dark:text-mutedDark/60 uppercase tracking-wider font-medium">
-            Phase 1: Free Models Only
-        </div>
-    </footer>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 z-50 hidden-modal flex items-center justify-center modal-backdrop">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="modal-backdrop"></div>
-        <div class="relative bg-surfaceLight dark:bg-surfaceDark w-full max-w-md mx-4 rounded-2xl shadow-2xl border border-borderLight dark:border-borderDark modal-panel flex flex-col max-h-[85vh]">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-5 border-b border-borderLight dark:border-borderDark">
-                <h2 class="text-xl font-bold">Settings</h2>
-                <button id="close-settings" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <!-- Body -->
-            <div class="p-6 overflow-y-auto space-y-5">
-                <!-- API Key -->
-                <div>
-                    <label class="block text-sm font-semibold mb-2">OpenRouter API Key</label>
-                    <input type="password" id="api-key-input" placeholder="sk-or-v1-..." class="w-full px-4 py-2.5 rounded-xl bg-bgLight dark:bg-bgDark border border-borderLight dark:border-borderDark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-mono">
-                    <div class="flex items-center justify-between mt-2">
-                        <a href="https://openrouter.ai/keys" target="_blank" class="text-xs text-primary hover:underline">Get your free key ↗</a>
-                        <span class="text-[10px] text-mutedLight dark:text-mutedDark">Stored locally in your browser</span>
+        <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg mx-4 mt-20 p-6 max-w-md mx-auto">
+                <h2 class="text-lg font-semibold mb-4">Settings</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="api-key" class="block text-sm font-medium mb-1">OpenRouter API Key</label>
+                        <input type="password" id="api-key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                     </div>
-                </div>
-
-                <!-- System Prompt -->
-                <div>
-                    <label class="block text-sm font-semibold mb-2">System Prompt</label>
-                    <textarea id="system-prompt-input" rows="3" placeholder="You are a helpful assistant..." class="w-full px-4 py-2.5 rounded-xl bg-bgLight dark:bg-bgDark border border-borderLight dark:border-borderDark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"></textarea>
-                </div>
-
-                <!-- Model Refresh -->
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Model List</label>
-                    <button id="refresh-models-btn" class="w-full py-2 rounded-xl border border-borderLight dark:border-borderDark hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                        Refresh Available Models
-                    </button>
-                </div>
-
-                <!-- Data Actions -->
-                <div class="pt-2">
-                    <button id="clear-history-btn" class="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-medium flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        Clear Chat History
-                    </button>
+                    <div>
+                        <label for="system-prompt" class="block text-sm font-medium mb-1">System Prompt</label>
+                        <textarea id="system-prompt" rows="3" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></textarea>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="refresh-models" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex-1">Refresh Models</button>
+                        <button id="clear-history" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex-1">Clear History</button>
+                    </div>
+                    <button id="close-settings" class="w-full mt-2 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Close</button>
                 </div>
             </div>
-            <!-- Footer -->
-            <div class="p-5 border-t border-borderLight dark:border-borderDark bg-surfaceLight dark:bg-surfaceDark rounded-b-2xl">
-                <button id="save-settings" class="w-full py-3 rounded-xl bg-primary hover:bg-primaryHover text-white font-bold transition-colors shadow-lg shadow-primary/20">
-                    Save & Close
-                </button>
-            </div>
+        </div>
+
+        <div id="chat-container" class="space-y-4 mb-4 markdown-body"></div>
+
+        <div class="flex gap-2">
+            <select id="model-selector" class="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                <option value="">Loading models...</option>
+            </select>
+            <button id="stop-generation" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 hidden">Stop</button>
+        </div>
+
+        <div class="mt-2 flex gap-2">
+            <textarea id="user-input" rows="1" class="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 resize-none" placeholder="Type your message..."></textarea>
+            <button id="send-button" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Send</button>
         </div>
     </div>
 
     <script>
-        // --- DOM Elements ---
-        const els = {
-            chat: document.getElementById('chat-container'),
-            welcome: document.getElementById('welcome-screen'),
-            input: document.getElementById('user-input'),
-            sendBtn: document.getElementById('send-btn'),
-            stopBtn: document.getElementById('stop-btn'),
-            themeBtn: document.getElementById('theme-btn'),
-            settingsBtn: document.getElementById('settings-btn'),
-            closeSettings: document.getElementById('close-settings'),
-            modal: document.getElementById('settings-modal'),
-            backdrop: document.getElementById('modal-backdrop'),
-            saveSettings: document.getElementById('save-settings'),
-            apiKeyInput: document.getElementById('api-key-input'),
-            sysPromptInput: document.getElementById('system-prompt-input'),
-            clearHistoryBtn: document.getElementById('clear-history-btn'),
-            refreshModelsBtn: document.getElementById('refresh-models-btn'),
-            modelSelect: document.getElementById('model-select'),
-            mobileModelSelect: document.getElementById('mobile-model-select'),
-            status: document.getElementById('status-indicator'),
-            suggestionBtns: document.querySelectorAll('.suggestion-btn'),
-            icons: {
-                moon: document.getElementById('moon-icon'),
-                sun: document.getElementById('sun-icon'),
-                lightTheme: document.getElementById('hljs-light-theme'),
-                darkTheme: document.getElementById('hljs-dark-theme')
-            }
-        };
-
-        // --- State Management ---
-        const state = {
-            messages: JSON.parse(localStorage.getItem('chat_history') || '[]'),
-            config: {
-                apiKey: localStorage.getItem('or_key') || '',
-                model: localStorage.getItem('or_model') || 'openrouter/auto',
-                sysPrompt: localStorage.getItem('or_sys') || 'You are a helpful, professional assistant.',
-                theme: localStorage.getItem('theme') || 'system'
+        // Initialize marked and highlight.js
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(code, { language: lang }).value;
+                }
+                return hljs.highlightAuto(code).value;
             },
-            models: [],
-            abortController: null,
-            isGenerating: false
-        };
+            langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class
+        });
 
-        // --- Initialization ---
-        async function init() {
-            setupTheme();
-            applyTheme();
-            
-            // Set inputs
-            els.apiKeyInput.value = state.config.apiKey;
-            els.sysPromptInput.value = state.config.sysPrompt;
-            
-            // Load Chat
-            if (state.messages.length > 0) {
-                els.welcome.classList.add('hidden');
-                renderAllMessages();
-            }
+        // DOM Elements
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const modelSelector = document.getElementById('model-selector');
+        const stopButton = document.getElementById('stop-generation');
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const settingsToggle = document.getElementById('settings-toggle');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettings = document.getElementById('close-settings');
+        const apiKeyInput = document.getElementById('api-key');
+        const systemPromptInput = document.getElementById('system-prompt');
+        const refreshModelsButton = document.getElementById('refresh-models');
+        const clearHistoryButton = document.getElementById('clear-history');
 
-            // Fetch Models
-            updateStatus('Fetching models...');
-            await fetchModels();
+        // State
+        let currentController = null;
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        let apiKey = localStorage.getItem('apiKey') || '';
+        let selectedModel = localStorage.getItem('selectedModel') || '';
+        let systemPrompt = localStorage.getItem('systemPrompt') || 'You are a helpful assistant.';
+        let isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches && localStorage.getItem('darkMode') === null);
 
-            // Event Listeners
-            els.input.addEventListener('input', () => {
-                els.input.style.height = 'auto';
-                els.input.style.height = Math.min(els.input.scrollHeight, 128) + 'px';
-            });
-            els.input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-            els.sendBtn.addEventListener('click', sendMessage);
-            els.stopBtn.addEventListener('click', stopGeneration);
-            els.themeBtn.addEventListener('click', toggleTheme);
-            els.settingsBtn.addEventListener('click', () => els.modal.classList.remove('hidden-modal'));
-            els.closeSettings.addEventListener('click', closeSettings);
-            els.backdrop.addEventListener('click', closeSettings);
-            els.saveSettings.addEventListener('click', saveSettings);
-            els.clearHistoryBtn.addEventListener('click', clearHistory);
-            els.refreshModelsBtn.addEventListener('click', () => {
-                els.refreshModelsBtn.innerHTML = 'Refreshing...';
-                fetchModels(true).then(() => {
-                    els.refreshModelsBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                        Refresh Available Models`;
-                });
-            });
-
-            els.modelSelect.addEventListener('change', (e) => {
-                state.config.model = e.target.value;
-                els.mobileModelSelect.value = e.target.value;
-                localStorage.setItem('or_model', state.config.model);
-            });
-            els.mobileModelSelect.addEventListener('change', (e) => {
-                state.config.model = e.target.value;
-                els.modelSelect.value = e.target.value;
-                localStorage.setItem('or_model', state.config.model);
-            });
-
-            els.suggestionBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    els.input.value = btn.dataset.prompt;
-                    els.input.focus();
-                    els.input.style.height = 'auto';
-                    els.input.style.height = els.input.scrollHeight + 'px';
-                });
-            });
-
-            updateModelSelectors();
-            updateStatus(state.config.apiKey ? 'Ready' : 'Add API Key');
+        // Apply theme
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
         }
 
-        // --- Model Fetching ---
-        async function fetchModels(force = false) {
-            // Fallback models if API fails
-            const fallbackModels = [
-                { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)' },
-                { id: 'meta-llama/llama-3-8b-instruct:free', name: 'Llama 3 8B (Free)' },
-                { id: 'google/gemma-2-9b-it:free', name: 'Gemma 2 9B (Free)' },
-                { id: 'microsoft/phi-3-mini-128k-instruct:free', name: 'Phi-3 Mini (Free)' }
-            ];
+        // Update UI from state
+        apiKeyInput.value = apiKey;
+        systemPromptInput.value = systemPrompt;
+        if (selectedModel) {
+            modelSelector.value = selectedModel;
+        }
 
+        // Render chat history
+        function renderChatHistory() {
+            chatContainer.innerHTML = '';
+            chatHistory.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `p-4 rounded-lg ${message.role === 'user' ? 'bg-blue-100 dark:bg-blue-900 ml-auto' : 'bg-gray-100 dark:bg-gray-700 mr-auto'}`;
+                messageElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="font-semibold">${message.role === 'user' ? 'You' : 'AI'}</span>
+                        ${message.role === 'assistant' && message.model ?
+                            `<span class="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500"
+                                  data-model="${message.model}"
+                                  title="Click to use this model again">
+                                🤖 ${message.model}
+                            </span>` : ''}
+                    </div>
+                    <div class="mt-2 markdown-body">${marked.parse(message.content)}</div>
+                `;
+                chatContainer.appendChild(messageElement);
+
+                // Add click handler for model badges
+                if (message.role === 'assistant' && message.model) {
+                    const badge = messageElement.querySelector(`[data-model="${message.model}"]`);
+                    badge.addEventListener('click', () => {
+                        modelSelector.value = message.model;
+                        selectedModel = message.model;
+                        localStorage.setItem('selectedModel', selectedModel);
+                    });
+                }
+            });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Fetch free models from OpenRouter
+        async function fetchFreeModels() {
             try {
-                const res = await fetch('https://openrouter.ai/api/v1/models');
-                if (!res.ok) throw new Error('API Error');
-                
-                const json = await res.json();
-                
-                // Filter for free models (pricing is 0)
-                const freeModels = json.data.filter(m => {
-                    // Check if pricing exists and is 0 or null
-                    const p = m.pricing || {};
-                    return (p.prompt === 0 || p.prompt === "0" || p.prompt === null) && 
-                           (p.completion === 0 || p.completion === "0" || p.completion === null);
+                const response = await fetch('https://openrouter.ai/api/v1/models', {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
                 });
-                
-                // Sort by name
-                state.models = freeModels.sort((a, b) => a.name.localeCompare(b.name));
-                
-                // If API returns nothing, use fallback
-                if (state.models.length === 0) {
-                    state.models = fallbackModels;
-                    updateStatus('Using fallback models');
-                } else {
-                    updateStatus(`${state.models.length} Free Models Loaded`);
+                if (!response.ok) throw new Error('Failed to fetch models');
+                const data = await response.json();
+                const freeModels = data.data.filter(model =>
+                    model.pricing?.prompt === 0 && model.pricing?.completion === 0
+                ).sort((a, b) => a.id.localeCompare(b.id));
+
+                modelSelector.innerHTML = '';
+                freeModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.name || model.id;
+                    modelSelector.appendChild(option);
+                });
+
+                if (freeModels.length > 0 && !selectedModel) {
+                    selectedModel = freeModels[0].id;
+                    modelSelector.value = selectedModel;
+                    localStorage.setItem('selectedModel', selectedModel);
                 }
+            } catch (error) {
+                console.error('Error fetching models:', error);
+                // Fallback to known free models
+                const fallbackModels = [
+                    'openrouter/free',
+                    'meta-llama/llama-3.3-70b-instruct:nitro',
+                    'mistralai/mistral-7b-instruct:nitro',
+                    'google/gemma-7b-it:nitro',
+                    'qwen/qwen2-72b-instruct:nitro'
+                ];
 
-            } catch (err) {
-                console.error('Model fetch error', err);
-                state.models = fallbackModels;
-                updateStatus('Offline mode (Using fallback models)');
-            }
-            
-            updateModelSelectors();
-        }
-
-        function updateModelSelectors() {
-            const buildOptions = (currentVal) => {
-                let html = `<option value="openrouter/auto">✨ Auto-Select (Recommended)</option>`;
-                state.models.forEach(m => {
-                    const cleanName = m.name.replace(' (Free)', '').trim();
-                    const isSelected = m.id === currentVal;
-                    html += `<option value="${m.id}" ${isSelected ? 'selected' : ''}>${cleanName}</option>`;
+                modelSelector.innerHTML = '';
+                fallbackModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model.split('/').pop().split(':')[0];
+                    modelSelector.appendChild(option);
                 });
-                return html;
-            };
 
-            const html = buildOptions(state.config.model);
-            els.modelSelect.innerHTML = html;
-            els.mobileModelSelect.innerHTML = html;
-        }
-
-        // --- Theme Handling ---
-        function setupTheme() {
-            if (state.config.theme === 'dark' || 
-               (state.config.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
+                if (fallbackModels.length > 0 && !selectedModel) {
+                    selectedModel = fallbackModels[0];
+                    modelSelector.value = selectedModel;
+                    localStorage.setItem('selectedModel', selectedModel);
+                }
             }
         }
 
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            state.config.theme = isDark ? 'dark' : 'light';
-            localStorage.setItem('theme', state.config.theme);
-            applyTheme();
-        }
-
-        function applyTheme() {
-            const isDark = document.documentElement.classList.contains('dark');
-            if (isDark) {
-                els.icons.moon.classList.remove('hidden');
-                els.icons.sun.classList.add('hidden');
-                els.icons.lightTheme.setAttribute('disabled', 'disabled');
-                els.icons.darkTheme.removeAttribute('disabled');
-            } else {
-                els.icons.moon.classList.add('hidden');
-                els.icons.sun.classList.remove('hidden');
-                els.icons.darkTheme.setAttribute('disabled', 'disabled');
-                els.icons.lightTheme.removeAttribute('disabled');
-            }
-        }
-
-        // --- Core Chat Logic ---
+        // Send message to OpenRouter API
         async function sendMessage() {
-            const text = els.input.value.trim();
-            if (!text || state.isGenerating) return;
-            
-            if (!state.config.apiKey) {
-                els.settingsBtn.classList.add('animate-pulse-slow');
-                setTimeout(() => els.settingsBtn.classList.remove('animate-pulse-slow'), 3000);
-                els.modal.classList.remove('hidden-modal');
-                return;
-            }
+            const message = userInput.value.trim();
+            if (!message || !apiKey) return;
 
-            // UI Reset
-            els.input.value = '';
-            els.input.style.height = 'auto';
-            if (state.messages.length === 0) els.welcome.classList.add('hidden');
-            
-            // Add User Message
-            addMessage('user', text);
-            state.messages.push({ role: 'user', content: text });
-            saveHistory();
-            
-            setGenerating(true);
-            
-            // Bot Placeholder
-            const botEl = addMessage('bot', '', true);
-            state.abortController = new AbortController();
+            // Add user message to chat
+            chatHistory.push({ role: 'user', content: message });
+            renderChatHistory();
+            userInput.value = '';
+            userInput.rows = 1;
+
+            // Add empty assistant message as placeholder
+            const assistantMessageIndex = chatHistory.length;
+            chatHistory.push({ role: 'assistant', content: '', model: selectedModel });
+            renderChatHistory();
 
             try {
-                // Prepare messages
-                const payload = {
-                    model: state.config.model,
-                    messages: [{ role: 'system', content: state.config.sysPrompt }, ...state.messages],
-                    stream: true
-                };
-
-                const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${state.config.apiKey}`,
+                        'Authorization': `Bearer ${apiKey}`,
                         'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'AI Chat App'
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'GitHub Page AI Chat'
                     },
-                    body: JSON.stringify(payload),
-                    signal: state.abortController.signal
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            ...chatHistory.slice(0, -1).map(msg => ({ role: msg.role, content: msg.content }))
+                        ],
+                        stream: true
+                    }),
+                    signal: new AbortController().signal
                 });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error?.message || 'API Error');
-                }
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+                if (!response.body) throw new Error('No response body');
 
-                // Get model ID from headers
-                const modelId = res.headers.get('x-model-id');
-
-                // Stream Processing - Fixed SSE parsing
-                const reader = res.body.getReader();
+                const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let buffer = '';
-                let content = '';
+                let result = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop() || ''; // Keep last incomplete line
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
                     for (const line of lines) {
-                        const trimmed = line.trim();
-                        // Fix: Correct SSE event parsing
-                        if (trimmed.startsWith(' ')) {
-                            const data = trimmed.slice(6); // Remove ' ' prefix
+                        if (line.startsWith('data:')) {
+                            const data = line.substring(5).trim();
                             if (data === '[DONE]') continue;
                             try {
                                 const parsed = JSON.parse(data);
-                                const chunk = parsed.choices?.[0]?.delta?.content || '';
-                                if (chunk) {
-                                    content += chunk;
-                                    updateBotMessage(botEl, content, true, modelId);
+                                const content = parsed.choices[0]?.delta?.content;
+                                if (content) {
+                                    result += content;
+                                    chatHistory[assistantMessageIndex].content = result;
+                                    renderChatHistory();
                                 }
                             } catch (e) {
-                                console.warn('JSON parse error:', e);
+                                console.error('Error parsing SSE:', e);
                             }
                         }
                     }
                 }
-                
-                // Finalize
-                updateBotMessage(botEl, content, false, modelId);
-                state.messages.push({ role: 'assistant', content: content });
-                
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    console.error('Chat error:', err);
-                    updateBotMessage(botEl, `⚠️ Error: ${err.message}`, false);
-                } else {
-                    updateBotMessage(botEl, 'Generation stopped.', false);
-                }
-            } finally {
-                setGenerating(false);
-                saveHistory();
+            } catch (error) {
+                console.error('Error:', error);
+                chatHistory[assistantMessageIndex].content = `⚠️ Error: ${error.message}`;
+                renderChatHistory();
             }
         }
 
-        function stopGeneration() {
-            if (state.abortController) {
-                state.abortController.abort();
+        // Event Listeners
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
-        }
+        });
 
-        // --- UI Rendering ---
-        function addMessage(role, text, isTyping = false) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex gap-3 mb-6 max-w-3xl mx-auto w-full animate-slide-up ${role === 'user' ? 'flex-row-reverse' : ''}`;
-            
-            // Avatar
-            const avatar = document.createElement('div');
-            avatar.className = `w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${role === 'user' ? 'bg-gray-200 dark:bg-gray-700' : 'bg-primary text-white'}`;
-            avatar.innerHTML = role === 'user' 
-                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-600 dark:text-gray-300"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
-                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
-            
-            // Bubble
-            const bubble = document.createElement('div');
-            bubble.className = `px-4 py-3 rounded-2xl max-w-[85%] shadow-sm ${role === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-gray-800 text-textLight dark:text-textDark rounded-tl-none border border-gray-100 dark:border-gray-700'}`;
-            
-            if (isTyping) {
-                bubble.innerHTML = '<div class="typing-cursor"></div>';
+        // Auto-grow textarea
+        userInput.addEventListener('input', () => {
+            userInput.rows = 1;
+            const scrollHeight = userInput.scrollHeight;
+            const rows = Math.min(Math.floor((scrollHeight - 34) / 20) + 1, 4);
+            userInput.rows = rows;
+        });
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+                themeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                `;
             } else {
-                bubble.innerHTML = renderMarkdown(text);
+                document.documentElement.classList.remove('dark');
+                themeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                `;
             }
+            localStorage.setItem('darkMode', isDarkMode);
+        });
 
-            // Model Badge (for bot)
-            let badge = null;
-            if (role === 'bot') {
-                badge = document.createElement('div');
-                badge.className = `mt-1.5 flex items-center gap-2 px-2 py-0.5 rounded bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 w-max cursor-pointer hover:border-primary/50 transition-colors`;
-                badge.innerHTML = `<span class="text-[10px] font-medium text-mutedLight dark:text-mutedDark uppercase tracking-wider">🤖 Generated with: <span class="model-name">...</span></span>`;
-                badge.onclick = () => {
-                    const modelName = badge.querySelector('.model-name').textContent;
-                    const opt = Array.from(els.modelSelect.options).find(o => o.text.includes(modelName));
-                    if (opt) {
-                        state.config.model = opt.value;
-                        els.modelSelect.value = opt.value;
-                        els.mobileModelSelect.value = opt.value;
-                        localStorage.setItem('or_model', state.config.model);
-                        // Flash animation to indicate change
-                        badge.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
-                        setTimeout(() => badge.style.backgroundColor = '', 500);
-                    }
-                };
+        // Settings modal
+        settingsToggle.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+        // Save API key
+        apiKeyInput.addEventListener('change', () => {
+            apiKey = apiKeyInput.value;
+            localStorage.setItem('apiKey', apiKey);
+        });
+
+        // Save system prompt
+        systemPromptInput.addEventListener('change', () => {
+            systemPrompt = systemPromptInput.value;
+            localStorage.setItem('systemPrompt', systemPrompt);
+        });
+
+        // Refresh models
+        refreshModelsButton.addEventListener('click', fetchFreeModels);
+
+        // Clear history
+        clearHistoryButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear your chat history?')) {
+                chatHistory = [];
+                localStorage.removeItem('chatHistory');
+                renderChatHistory();
             }
+        });
 
-            wrapper.appendChild(avatar);
-            const textWrapper = document.createElement('div');
-            textWrapper.appendChild(bubble);
-            if (badge) textWrapper.appendChild(badge);
-            wrapper.appendChild(textWrapper);
-            
-            els.chat.appendChild(wrapper);
-            scrollToBottom();
-            return { bubble, badge };
-        }
+        // Model selector change
+        modelSelector.addEventListener('change', () => {
+            selectedModel = modelSelector.value;
+            localStorage.setItem('selectedModel', selectedModel);
+        });
 
-        function renderAllMessages() {
-            state.messages.forEach((m, i) => {
-                const role = m.role === 'assistant' ? 'bot' : m.role;
-                const el = addMessage(role, m.content, false);
-                if (el.badge) el.badge.style.display = 'none'; 
-            });
-        }
-
-        function updateBotMessage(el, content, isTyping, modelId = null) {
-            el.bubble.innerHTML = renderMarkdown(content);
-            if (isTyping) el.bubble.classList.add('typing-cursor');
-            else el.bubble.classList.remove('typing-cursor');
-            scrollToBottom();
-
-            if (modelId && el.badge) {
-                // Format model name (remove provider prefix)
-                let cleanName = modelId.split('/').pop().replace(':free', '');
-                // Capitalize
-                cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-                el.badge.querySelector('.model-name').textContent = cleanName;
-                el.badge.style.display = 'flex';
-            }
-        }
-
-        function updateStatus(text) {
-            els.status.textContent = text;
-        }
-
-        function setGenerating(val) {
-            state.isGenerating = val;
-            els.sendBtn.disabled = val;
-            if (val) {
-                els.stopBtn.classList.remove('hidden');
-                els.sendBtn.classList.add('hidden');
-                updateStatus('AI is thinking...');
-            } else {
-                els.stopBtn.classList.add('hidden');
-                els.sendBtn.classList.remove('hidden');
-                updateStatus(state.config.apiKey ? 'Ready' : 'Add API Key');
-            }
-        }
-
-        // --- Markdown & Code Highlight ---
-        function renderMarkdown(text) {
-            marked.setOptions({
-                highlight: function(code, lang) {
-                    if (lang && hljs.getLanguage(lang)) {
-                        return hljs.highlight(code, { language: lang }).value;
-                    }
-                    return code;
-                },
-                breaks: true
-            });
-            
-            let rawHtml = marked.parse(text);
-            // Wrap code blocks in custom structure for styling
-            return rawHtml.replace(/<pre><code class="hljs language-(\w+)">([\s\S]*?)<\/code><\/pre>/g, 
-                (match, lang, code) => {
-                    const langLabel = lang.charAt(0).toUpperCase() + lang.slice(1);
-                    return `<pre><div class="code-header"><span>${langLabel}</span><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText)" class="text-gray-400 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div><code>${code}</code></pre>`;
-                });
-        }
-
-        // --- Helpers ---
-        function scrollToBottom() {
-            els.chat.scrollTo({ top: els.chat.scrollHeight, behavior: 'smooth' });
-        }
-
-        function saveHistory() {
-            localStorage.setItem('chat_history', JSON.stringify(state.messages));
-        }
-
-        function clearHistory() {
-            if(confirm('Are you sure you want to delete all history?')) {
-                state.messages = [];
-                localStorage.removeItem('chat_history');
-                els.chat.innerHTML = '';
-                els.chat.appendChild(els.welcome);
-                els.welcome.classList.remove('hidden');
-                closeSettings();
-            }
-        }
-
-        function saveSettings() {
-            state.config.apiKey = els.apiKeyInput.value.trim();
-            state.config.sysPrompt = els.sysPromptInput.value.trim();
-            
-            localStorage.setItem('or_key', state.config.apiKey);
-            localStorage.setItem('or_sys', state.config.sysPrompt);
-            
-            // Refresh model list if key changed? Optional, but good practice.
-            if (state.config.apiKey && state.models.length < 5) {
-                fetchModels();
-            }
-
-            updateStatus(state.config.apiKey ? 'Settings Saved' : 'Add API Key');
-            closeSettings();
-        }
-
-        function closeSettings() {
-            els.modal.classList.add('hidden-modal');
-        }
-
-        // Start
-        init();
+        // Initialize
+        fetchFreeModels();
+        renderChatHistory();
     </script>
 </body>
 </html>
-
