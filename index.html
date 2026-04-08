@@ -11,7 +11,7 @@
     <!-- Highlight.js for Code Blocks -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light-theme">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark-theme" disabled>
-    <script src="https://cdnjscdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -52,6 +52,12 @@
         }
     </script>
     <style>
+        /* Fix for mobile browser bars */
+        body {
+            height: 100dvh; /* Dynamic viewport height */
+            height: -webkit-fill-available; /* iOS Safari fix */
+        }
+        
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -95,7 +101,7 @@
         ::selection { background-color: #6366f1; color: white; }
     </style>
 </head>
-<body class="bg-bgLight text-textLight dark:bg-bgDark dark:text-textDark h-screen flex flex-col overflow-hidden transition-colors duration-200">
+<body class="bg-bgLight text-textLight dark:bg-bgDark dark:text-textDark flex flex-col overflow-hidden transition-colors duration-200">
 
     <!-- Header -->
     <header class="flex-none h-16 border-b border-borderLight dark:border-borderDark bg-surfaceLight/80 dark:bg-surfaceDark/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
@@ -110,7 +116,7 @@
         </div>
         
         <div class="flex items-center gap-2 ml-2">
-            <!-- Model Selector -->
+            <!-- Model Selector (Desktop) -->
             <div class="relative hidden md:block">
                 <select id="model-select" class="appearance-none bg-transparent border border-borderLight dark:border-borderDark text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
                     <option value="" disabled>Loading...</option>
@@ -138,7 +144,7 @@
     </div>
 
     <!-- Chat Container -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-h-0">
         <!-- Welcome Message -->
         <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white mb-6 shadow-lg shadow-primary/25">
@@ -215,6 +221,15 @@
                     <textarea id="system-prompt-input" rows="3" placeholder="You are a helpful assistant..." class="w-full px-4 py-2.5 rounded-xl bg-bgLight dark:bg-bgDark border border-borderLight dark:border-borderDark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"></textarea>
                 </div>
 
+                <!-- Model Refresh -->
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Model List</label>
+                    <button id="refresh-models-btn" class="w-full py-2 rounded-xl border border-borderLight dark:border-borderDark hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        Refresh Available Models
+                    </button>
+                </div>
+
                 <!-- Data Actions -->
                 <div class="pt-2">
                     <button id="clear-history-btn" class="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-medium flex items-center justify-center gap-2">
@@ -249,6 +264,7 @@
             apiKeyInput: document.getElementById('api-key-input'),
             sysPromptInput: document.getElementById('system-prompt-input'),
             clearHistoryBtn: document.getElementById('clear-history-btn'),
+            refreshModelsBtn: document.getElementById('refresh-models-btn'),
             modelSelect: document.getElementById('model-select'),
             mobileModelSelect: document.getElementById('mobile-model-select'),
             status: document.getElementById('status-indicator'),
@@ -313,6 +329,14 @@
             els.backdrop.addEventListener('click', closeSettings);
             els.saveSettings.addEventListener('click', saveSettings);
             els.clearHistoryBtn.addEventListener('click', clearHistory);
+            els.refreshModelsBtn.addEventListener('click', () => {
+                els.refreshModelsBtn.innerHTML = 'Refreshing...';
+                fetchModels(true).then(() => {
+                    els.refreshModelsBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        Refresh Available Models`;
+                });
+            });
 
             els.modelSelect.addEventListener('change', (e) => {
                 state.config.model = e.target.value;
@@ -339,30 +363,47 @@
         }
 
         // --- Model Fetching ---
-        async function fetchModels() {
+        async function fetchModels(force = false) {
+            // Fallback models if API fails
+            const fallbackModels = [
+                { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)' },
+                { id: 'meta-llama/llama-3-8b-instruct:free', name: 'Llama 3 8B (Free)' },
+                { id: 'google/gemma-2-9b-it:free', name: 'Gemma 2 9B (Free)' },
+                { id: 'microsoft/phi-3-mini-128k-instruct:free', name: 'Phi-3 Mini (Free)' }
+            ];
+
             try {
                 const res = await fetch('https://openrouter.ai/api/v1/models');
+                if (!res.ok) throw new Error('API Error');
+                
                 const json = await res.json();
                 
-                // Filter for free models (pricing is 0) or auto
-                const freeModels = json.data.filter(m => m.pricing.prompt === 0 && m.pricing.completion === 0);
+                // Filter for free models (pricing is 0)
+                const freeModels = json.data.filter(m => {
+                    // Check if pricing exists and is 0 or null
+                    const p = m.pricing || {};
+                    return (p.prompt === 0 || p.prompt === "0" || p.prompt === null) && 
+                           (p.completion === 0 || p.completion === "0" || p.completion === null);
+                });
                 
                 // Sort by name
                 state.models = freeModels.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // If API returns nothing, use fallback
+                if (state.models.length === 0) {
+                    state.models = fallbackModels;
+                    updateStatus('Using fallback models');
+                } else {
+                    updateStatus(`${state.models.length} Free Models Loaded`);
+                }
 
-                updateModelSelectors();
-                updateStatus(state.models.length > 0 ? `${state.models.length} Free Models Loaded` : 'No free models found');
             } catch (err) {
                 console.error('Model fetch error', err);
-                updateStatus('Failed to load models (Offline?)');
-                // Fallbacks
-                state.models = [
-                    { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)' },
-                    { id: 'meta-llama/llama-3-8b-instruct:free', name: 'Llama 3 8B (Free)' },
-                    { id: 'google/gemma-2-9b-it:free', name: 'Gemma 2 9B (Free)' }
-                ];
-                updateModelSelectors();
+                state.models = fallbackModels;
+                updateStatus('Offline mode (Using fallback models)');
             }
+            
+            updateModelSelectors();
         }
 
         function updateModelSelectors() {
@@ -384,7 +425,7 @@
         // --- Theme Handling ---
         function setupTheme() {
             if (state.config.theme === 'dark' || 
-               (!state.config.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+               (state.config.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
@@ -481,7 +522,7 @@
                     buffer = lines.pop() || '';
 
                     for (const line of lines) {
-                        if (line.startsWith('data: ')) {
+                        if (line.startsWith(' ')) {
                             const data = line.slice(6);
                             if (data === '[DONE]') continue;
                             try {
@@ -571,15 +612,9 @@
         }
 
         function renderAllMessages() {
-            // This is a simplified re-render. In a real app, we'd optimize this.
             state.messages.forEach((m, i) => {
                 const role = m.role === 'assistant' ? 'bot' : m.role;
-                // For re-render, we don't stream, so isTyping=false.
-                // We lose the specific model used from the stream headers on refresh unless we store it in messages.
-                // But for this Phase 1 implementation, we just show the text.
                 const el = addMessage(role, m.content, false);
-                // Since we don't store model ID in local storage messages in this simplified version,
-                // we can't show the badge correctly on reload. We will hide it if content is old.
                 if (el.badge) el.badge.style.display = 'none'; 
             });
         }
