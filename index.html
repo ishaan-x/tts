@@ -12,295 +12,54 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --bg: 250 250 250;
-            --bg-secondary: 243 243 243;
-            --bg-tertiary: 237 237 237;
-            --text: 23 23 23;
-            --text-muted: 100 100 100;
-            --accent: 63 131 248;
-            --accent-hover: 59 130 246;
-            --border: 229 231 235;
-            --success: 34 197 94;
-            --error: 239 68 68;
-            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --bg: 250 250 250; --bg-secondary: 243 243 243; --bg-tertiary: 237 237 237;
+            --text: 23 23 23; --text-muted: 100 100 100; --accent: 63 131 248;
+            --accent-hover: 59 130 246; --border: 229 231 235; --success: 34 197 94;
+            --error: 239 68 68; --shadow: 0 4px 24px rgba(0,0,0,0.08);
         }
 
         .dark {
-            --bg: 15 15 15;
-            --bg-secondary: 23 23 23;
-            --bg-tertiary: 38 38 38;
-            --text: 236 236 236;
-            --text-muted: 161 161 161;
-            --accent: 96 165 250;
-            --accent-hover: 59 130 246;
-            --border: 38 38 38;
-            --success: 74 222 128;
-            --error: 248 113 113;
-            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --bg: 15 15 15; --bg-secondary: 23 23 23; --bg-tertiary: 38 38 38;
+            --text: 236 236 236; --text-muted: 161 161 161; --accent: 96 165 250;
+            --accent-hover: 59 130 246; --border: 38 38 38; --success: 74 222 128;
+            --error: 248 113 113; --shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: rgb(var(--bg)); color: rgb(var(--text)); line-height: 1.5; min-height: 100dvh; overflow: hidden; }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        .markdown-body { font-size: 15px; line-height: 1.7; }
+        .markdown-body p { margin-bottom: 12px; } .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; line-height: 1.3; }
+        .markdown-body h1 { font-size: 1.75em; } .markdown-body h2 { font-size: 1.5em; } .markdown-body h3 { font-size: 1.25em; }
+        .markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin-bottom: 12px; }
+        .markdown-body li { margin-bottom: 4px; }
+        .markdown-body a { color: rgb(var(--accent)); text-decoration: underline; text-underline-offset: 2px; }
+        .markdown-body code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.85em; background: rgba(var(--bg-tertiary), 0.8); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(var(--border), 0.5); }
+        .markdown-body pre { margin: 12px 0; border-radius: 12px; overflow: hidden; background: #1e293b; border: 1px solid rgba(var(--border), 0.3); }
+        .markdown-body pre code { background: none; border: none; padding: 16px; display: block; overflow-x: auto; font-size: 14px; line-height: 1.6; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(var(--border), 0.2); font-size: 12px; font-family: 'JetBrains Mono', monospace; color: rgb(var(--text-muted)); }
+        .copy-code-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 6px; color: rgb(var(--text-muted)); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+        .copy-code-btn:hover { background: rgba(255, 255, 255, 0.2); color: rgb(var(--text)); }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: rgb(var(--bg));
-            color: rgb(var(--text));
-            line-height: 1.5;
-            min-height: 100dvh;
-            overflow: hidden;
-        }
-
-        .markdown-body {
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .markdown-body p {
-            margin-bottom: 12px;
-        }
-
-        .markdown-body p:last-child {
-            margin-bottom: 0;
-        }
-
-        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4,
-        .markdown-body h5, .markdown-body h6 {
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            font-weight: 600;
-            line-height: 1.3;
-            color: rgb(var(--text));
-        }
-
-        .markdown-body h1 { font-size: 1.75em; }
-        .markdown-body h2 { font-size: 1.5em; }
-        .markdown-body h3 { font-size: 1.25em; }
-
-        .markdown-body ul, .markdown-body ol {
-            padding-left: 1.5em;
-            margin-bottom: 12px;
-        }
-
-        .markdown-body li {
-            margin-bottom: 4px;
-        }
-
-        .markdown-body a {
-            color: rgb(var(--accent));
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .markdown-body code {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            font-size: 0.85em;
-            background: rgba(var(--bg-tertiary), 0.8);
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid rgba(var(--border), 0.5);
-        }
-
-        .markdown-body pre {
-            margin: 12px 0;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #1e293b;
-            border: 1px solid rgba(var(--border), 0.3);
-        }
-
-        .markdown-body pre code {
-            background: none;
-            border: none;
-            padding: 16px;
-            display: block;
-            overflow-x: auto;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 16px;
-            background: rgba(30, 41, 59, 0.8);
-            border-bottom: 1px solid rgba(var(--border), 0.2);
-            font-size: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            color: rgb(var(--text-muted));
-        }
-
-        .copy-code-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 6px;
-            color: rgb(var(--text-muted));
-            font-size: 11px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .copy-code-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: rgb(var(--text));
-        }
-
-        .message-enter {
-            animation: messageSlide 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-
-        @keyframes messageSlide {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: rgb(var(--accent));
-            border-radius: 50%;
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        .btn-hover {
-            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-
-        .btn-hover:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn-hover:active {
-            transform: translateY(0);
-        }
-
-        input[type="text"],
-        input[type="password"],
-        textarea {
-            transition: all 0.2s;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus,
-        textarea:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(var(--accent), 0.15);
-        }
-
-        .modal-enter {
-            animation: modalFadeIn 0.25s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(var(--text-muted), 0.3);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(var(--text-muted), 0.5);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgb(var(--bg-secondary));
-            border: 1px solid rgb(var(--border));
-            padding: 10px 20px;
-            border-radius: 100px;
-            font-size: 13px;
-            box-shadow: var(--shadow);
-            z-index: 100;
-            animation: toastIn 0.3s ease-out, toastOut 0.3s ease-out 2.7s forwards;
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        @keyframes toastOut {
-            to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        }
-
-        .skeleton {
-            background: linear-gradient(
-                90deg,
-                rgba(var(--bg-tertiary), 0.8) 25%,
-                rgba(var(--bg-secondary), 0.8) 50%,
-                rgba(var(--bg-tertiary), 0.8) 75%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 4px;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
-        @media (max-width: 768px) {
-            .markdown-body {
-                font-size: 14px;
-            }
-            .modal-enter {
-                animation: modalFadeInMobile 0.25s ease-out;
-            }
-            @keyframes modalFadeInMobile {
-                from { opacity: 0; transform: translateY(100%); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        }
-
-        .focus-visible:focus-visible {
-            outline: 2px solid rgb(var(--accent));
-            outline-offset: 2px;
-        }
+        .message-enter { animation: messageSlide 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        @keyframes messageSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-dot { width: 8px; height: 8px; background: rgb(var(--accent)); border-radius: 50%; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+        .btn-hover { transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1); } .btn-hover:hover { transform: translateY(-1px); } .btn-hover:active { transform: translateY(0); }
+        input[type="text"], input[type="password"], textarea { transition: all 0.2s; }
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(var(--accent), 0.15); }
+        .modal-enter { animation: modalFadeIn 0.25s ease-out; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(var(--text-muted), 0.3); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: rgba(var(--text-muted), 0.5); }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgb(var(--bg-secondary)); border: 1px solid rgb(var(--border)); padding: 10px 20px; border-radius: 100px; font-size: 13px; box-shadow: var(--shadow); z-index: 100; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-out 2.7s forwards; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } } @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+        .skeleton { background: linear-gradient(90deg, rgba(var(--bg-tertiary), 0.8) 25%, rgba(var(--bg-secondary), 0.8) 50%, rgba(var(--bg-tertiary), 0.8) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @media (max-width: 768px) { .markdown-body { font-size: 14px; } }
+        .provider-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; background: rgb(var(--bg-secondary)); border: 1px solid rgb(var(--border)); border-radius: 9999px; font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .provider-badge:hover { border-color: rgb(var(--accent)); color: rgb(var(--accent)); }
     </style>
 </head>
 <body>
@@ -315,15 +74,20 @@
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <h1 class="text-lg font-semibold leading-tight truncate">AI Chat</h1>
-                        <p class="text-xs text-[rgb(var(--text-muted))] truncate" id="header-status">Ready</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button id="provider-btn" class="provider-badge btn-hover" title="Switch Provider">
+                                <span id="provider-icon">🌐</span>
+                                <span id="provider-name">OpenRouter</span>
+                                <svg class="w-3 h-3 text-[rgb(var(--text-muted))]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <span id="model-badge" class="text-xs px-2 py-0.5 bg-[rgb(var(--bg-tertiary))] rounded-full truncate max-w-[140px]">openrouter/free</span>
+                        </div>
+                        <p class="text-xs text-[rgb(var(--text-muted))] truncate mt-0.5" id="header-status">Ready</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1 flex-shrink-0">
                     <button id="btn-new-chat" class="p-2 rounded-lg hover:bg-[rgb(var(--bg-secondary))] btn-hover" title="New Chat">
-                        <svg class="w-5 h-5 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
+                        <svg class="w-5 h-5 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     </button>
                     <button id="btn-theme" class="p-2 rounded-lg hover:bg-[rgb(var(--bg-secondary))] btn-hover" title="Toggle Theme">
                         <svg id="icon-theme" class="w-5 h-5 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -343,21 +107,16 @@
         <!-- Chat Area -->
         <main id="chat-container" class="flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
             <div id="chat-content" class="max-w-4xl mx-auto space-y-6"></div>
-            
-            <!-- Welcome State -->
             <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center">
-                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg mb-6 animate-pulse">
-                    <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
                 <h2 class="text-2xl font-semibold mb-2">How can I help you today?</h2>
-                <p class="text-[rgb(var(--text-muted))] max-w-md">Ask me anything, from coding to creative writing to quick answers.</p>
-                
+                <p class="text-[rgb(var(--text-muted))] max-w-md">Ask anything. Supports OpenAI, OpenRouter, Groq, Ollama, and any OpenAI-compatible provider.</p>
                 <div class="mt-8 flex flex-wrap justify-center gap-2">
                     <button class="px-3 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-full text-xs font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors" onclick="useSuggestion('Explain quantum computing in simple terms')">💡 Explain quantum computing</button>
-                    <button class="px-3 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-full text-xs font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors" onclick="useSuggestion('Write a Python function to sort a list')">🐍 Python sorting function</button>
-                    <button class="px-3 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-full text-xs font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors" onclick="useSuggestion('Help me brainstorm creative ideas for a blog')">🎨 Blog brainstorm</button>
+                    <button class="px-3 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-full text-xs font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors" onclick="useSuggestion('Write a Python function to sort a list')">🐍 Python sorting</button>
+                    <button class="px-3 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-full text-xs font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors" onclick="useSuggestion('Help me brainstorm blog ideas')">🎨 Blog brainstorm</button>
                 </div>
             </div>
         </main>
@@ -366,25 +125,17 @@
         <footer class="px-4 py-3 border-t border-[rgb(var(--border))] bg-[rgb(var(--bg))]/80 backdrop-blur-md">
             <div class="max-w-4xl mx-auto">
                 <div class="relative bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-2xl overflow-hidden focus-within:border-[rgb(var(--accent))] focus-within:shadow-sm transition-all">
-                    <textarea id="user-input" rows="1" 
-                              class="w-full px-4 py-3 bg-transparent resize-none outline-none text-[15px] leading-relaxed max-h-[160px]"
-                              placeholder="Message AI..."
-                              aria-label="Message input"></textarea>
-                    
+                    <textarea id="user-input" rows="1" class="w-full px-4 py-3 bg-transparent resize-none outline-none text-[15px] leading-relaxed max-h-[160px]" placeholder="Message AI..." aria-label="Message input"></textarea>
                     <div class="flex items-center justify-between px-3 py-2 border-t border-[rgb(var(--border))] bg-[rgb(var(--bg-secondary))]">
                         <div class="flex items-center gap-2 text-xs text-[rgb(var(--text-muted))]">
-                            <span class="bg-[rgb(var(--bg-tertiary))] px-2 py-0.5 rounded">openrouter/free</span>
+                            <span class="bg-[rgb(var(--bg-tertiary))] px-2 py-0.5 rounded" id="footer-provider">OpenRouter</span>
                         </div>
                         <div class="flex items-center gap-1">
                             <button id="btn-stop" class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 btn-hover hidden" title="Stop generating">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
-                                </svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>
                             </button>
                             <button id="btn-send" class="p-2 rounded-lg bg-[rgb(var(--accent))] text-white hover:bg-[rgb(var(--accent-hover))] btn-hover" title="Send message">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                             </button>
                         </div>
                     </div>
@@ -400,18 +151,18 @@
             <div class="px-6 py-4 border-b border-[rgb(var(--border))] flex justify-between items-center flex-shrink-0">
                 <h2 class="text-lg font-semibold">Settings</h2>
                 <button id="btn-close-modal" class="p-2 rounded-lg hover:bg-[rgb(var(--bg-secondary))] transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-            
             <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Active Provider</label>
+                    <select id="provider-select" class="w-full px-3 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm focus:outline-none"></select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5">API Key</label>
                     <div class="relative">
-                        <input type="password" id="api-key" placeholder="sk-or-..."
-                               class="w-full px-3 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm focus:outline-none pr-10">
+                        <input type="password" id="api-key" placeholder="sk-..." class="w-full px-3 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm focus:outline-none pr-10">
                         <button id="btn-toggle-key" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-[rgb(var(--bg-tertiary))]">
                             <svg class="w-4 h-4 text-[rgb(var(--text-muted))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -420,32 +171,29 @@
                         </button>
                     </div>
                     <p id="api-error" class="text-xs text-red-500 mt-1 hidden"></p>
+                    <p class="text-xs text-[rgb(var(--text-muted))] mt-1">Stored locally. Never sent elsewhere.</p>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium mb-1.5">System Prompt</label>
-                    <textarea id="system-prompt" rows="3" 
-                              class="w-full px-3 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm focus:outline-none resize-none"></textarea>
+                    <textarea id="system-prompt" rows="3" class="w-full px-3 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm focus:outline-none resize-none"></textarea>
                     <div class="flex gap-2 mt-2">
                         <button id="tmpl-helpful" class="flex-1 px-2 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-xs font-medium hover:border-blue-400 hover:text-blue-500 transition-colors">👨‍💻 Helpful</button>
                         <button id="tmpl-creative" class="flex-1 px-2 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-xs font-medium hover:border-purple-400 hover:text-purple-500 transition-colors">🎨 Creative</button>
                         <button id="tmpl-concise" class="flex-1 px-2 py-1.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-xs font-medium hover:border-green-400 hover:text-green-500 transition-colors">🎯 Concise</button>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium mb-1.5">Models</label>
                     <div class="relative mb-2">
-                        <input type="text" id="model-search" placeholder="Search..."
-                               class="w-full px-3 py-2 pl-9 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm focus:outline-none">
-                        <svg class="absolute left-3 top-2.5 w-4 h-4 text-[rgb(var(--text-muted))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <input type="text" id="model-search" placeholder="Search..." class="w-full px-3 py-2 pl-9 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm focus:outline-none">
+                        <svg class="absolute left-3 top-2.5 w-4 h-4 text-[rgb(var(--text-muted))]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
                     <div id="model-list" class="max-h-40 overflow-y-auto space-y-1 border border-[rgb(var(--border))] rounded-lg bg-[rgb(var(--bg-secondary))]"></div>
                 </div>
+                <div class="pt-2 border-t border-[rgb(var(--border))]">
+                    <button id="btn-add-provider" class="w-full py-2.5 border border-dashed border-[rgb(var(--border))] rounded-xl text-sm text-[rgb(var(--text-muted))] hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors">+ Add Custom Provider</button>
+                </div>
             </div>
-            
             <div class="px-6 py-4 border-t border-[rgb(var(--border))] flex gap-3 flex-shrink-0">
                 <button id="btn-refresh-models" class="flex-1 py-2.5 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-xl text-sm font-medium hover:border-[rgb(var(--accent))] hover:text-[rgb(var(--accent))] transition-colors">Refresh Models</button>
                 <button id="btn-clear-history" class="flex-1 py-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/20 transition-colors">Clear History</button>
@@ -453,23 +201,49 @@
         </div>
     </div>
 
+    <!-- Custom Provider Modal -->
+    <div id="modal-provider" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-[rgb(var(--bg))] rounded-2xl shadow-xl p-6 modal-enter">
+            <h3 class="text-lg font-semibold mb-4">Add Custom Provider</h3>
+            <div class="space-y-3">
+                <input type="text" id="cp-name" placeholder="Display Name (e.g., Fireworks)" class="w-full px-3 py-2 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm">
+                <input type="text" id="cp-baseurl" placeholder="Base URL (e.g., https://api.example.com/v1)" class="w-full px-3 py-2 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm">
+                <input type="text" id="cp-modelpath" placeholder="Models Endpoint (optional, default: /models)" class="w-full px-3 py-2 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm">
+                <div class="flex gap-2">
+                    <select id="cp-auth" class="flex-1 px-3 py-2 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm">
+                        <option value="Bearer">Bearer Token</option>
+                        <option value="None">No Auth</option>
+                    </select>
+                    <input type="text" id="cp-icon" placeholder="🔗" class="w-16 px-3 py-2 bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-lg text-sm text-center">
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button id="btn-cancel-cp" class="flex-1 py-2 border border-[rgb(var(--border))] rounded-lg text-sm">Cancel</button>
+                    <button id="btn-save-cp" class="flex-1 py-2 bg-[rgb(var(--accent))] text-white rounded-lg text-sm">Add Provider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Config
-        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        const DEFAULT_MODEL = 'openrouter/free';
-        const FALLBACK_MODELS = [
-            { id: 'openrouter/free', name: 'OpenRouter Free (Auto)' },
-            { id: 'meta-llama/llama-3.3-70b-instruct:nitro', name: 'Llama 3.3 70B' },
-            { id: 'mistralai/mistral-7b-instruct:nitro', name: 'Mistral 7B' }
+        // Provider Registry
+        const BUILTIN_PROVIDERS = [
+            { id: 'openrouter', name: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', modelPath: '/models', auth: 'Bearer', icon: '🌐' },
+            { id: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', modelPath: '/models', auth: 'Bearer', icon: '🔷' },
+            { id: 'groq', name: 'Groq', baseUrl: 'https://api.groq.com/openai/v1', modelPath: '/models', auth: 'Bearer', icon: '⚡' },
+            { id: 'together', name: 'Together AI', baseUrl: 'https://api.together.xyz/v1', modelPath: '/models', auth: 'Bearer', icon: '🔶' },
+            { id: 'ollama', name: 'Ollama (Local)', baseUrl: 'http://localhost:11434/v1', modelPath: null, auth: null, icon: '🦙' },
+            { id: 'lmstudio', name: 'LM Studio', baseUrl: 'http://localhost:1234/v1', modelPath: '/models', auth: null, icon: '🛠️' }
         ];
 
         // State
         const state = {
             history: JSON.parse(localStorage.getItem('chatHistory')) || [],
-            apiKey: localStorage.getItem('apiKey') || '',
-            selectedModel: localStorage.getItem('selectedModel') || DEFAULT_MODEL,
             systemPrompt: localStorage.getItem('systemPrompt') || 'You are a helpful, knowledgeable, and friendly assistant.',
             isDark: localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches),
+            providers: JSON.parse(localStorage.getItem('providers')) || [...BUILTIN_PROVIDERS],
+            apiKeys: JSON.parse(localStorage.getItem('apiKeys')) || {},
+            activeProviderId: localStorage.getItem('activeProvider') || 'openrouter',
+            selectedModel: localStorage.getItem('selectedModel') || 'openrouter/free',
             models: [],
             generating: false,
             controller: null,
@@ -479,39 +253,22 @@
 
         // DOM refs
         const dom = {
-            chatContainer: document.getElementById('chat-container'),
-            chatContent: document.getElementById('chat-content'),
-            welcomeScreen: document.getElementById('welcome-screen'),
-            userInput: document.getElementById('user-input'),
-            btnSend: document.getElementById('btn-send'),
-            btnStop: document.getElementById('btn-stop'),
-            btnTheme: document.getElementById('btn-theme'),
-            iconTheme: document.getElementById('icon-theme'),
-            btnSettings: document.getElementById('btn-settings'),
-            btnNewChat: document.getElementById('btn-new-chat'),
-            modalSettings: document.getElementById('modal-settings'),
-            btnCloseModal: document.getElementById('btn-close-modal'),
-            apiKeyInput: document.getElementById('api-key'),
-            apiKeyError: document.getElementById('api-error'),
-            btnToggleKey: document.getElementById('btn-toggle-key'),
-            systemPromptInput: document.getElementById('system-prompt'),
-            tmplHelpful: document.getElementById('tmpl-helpful'),
-            tmplCreative: document.getElementById('tmpl-creative'),
-            tmplConcise: document.getElementById('tmpl-concise'),
-            modelSearch: document.getElementById('model-search'),
-            modelList: document.getElementById('model-list'),
-            btnRefreshModels: document.getElementById('btn-refresh-models'),
-            btnClearHistory: document.getElementById('btn-clear-history'),
-            headerStatus: document.getElementById('header-status')
+            chatContainer: document.getElementById('chat-container'), chatContent: document.getElementById('chat-content'), welcomeScreen: document.getElementById('welcome-screen'),
+            userInput: document.getElementById('user-input'), btnSend: document.getElementById('btn-send'), btnStop: document.getElementById('btn-stop'),
+            btnTheme: document.getElementById('btn-theme'), iconTheme: document.getElementById('icon-theme'), btnSettings: document.getElementById('btn-settings'), btnNewChat: document.getElementById('btn-new-chat'),
+            modalSettings: document.getElementById('modal-settings'), btnCloseModal: document.getElementById('btn-close-modal'), providerBtn: document.getElementById('provider-btn'),
+            providerIcon: document.getElementById('provider-icon'), providerName: document.getElementById('provider-name'), modelBadge: document.getElementById('model-badge'),
+            footerProvider: document.getElementById('footer-provider'), headerStatus: document.getElementById('header-status'), providerSelect: document.getElementById('provider-select'),
+            apiKeyInput: document.getElementById('api-key'), apiKeyError: document.getElementById('api-error'), btnToggleKey: document.getElementById('btn-toggle-key'),
+            systemPromptInput: document.getElementById('system-prompt'), tmplHelpful: document.getElementById('tmpl-helpful'), tmplCreative: document.getElementById('tmpl-creative'), tmplConcise: document.getElementById('tmpl-concise'),
+            modelSearch: document.getElementById('model-search'), modelList: document.getElementById('model-list'), btnRefreshModels: document.getElementById('btn-refresh-models'),
+            btnClearHistory: document.getElementById('btn-clear-history'), btnAddProvider: document.getElementById('btn-add-provider'), modalProvider: document.getElementById('modal-provider'),
+            cpName: document.getElementById('cp-name'), cpBaseurl: document.getElementById('cp-baseurl'), cpModelpath: document.getElementById('cp-modelpath'), cpAuth: document.getElementById('cp-auth'),
+            cpIcon: document.getElementById('cp-icon'), btnCancelCp: document.getElementById('btn-cancel-cp'), btnSaveCp: document.getElementById('btn-save-cp')
         };
 
         // Initialize Marked
-        marked.setOptions({
-            highlight: (code, lang) => lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : hljs.highlightAuto(code).value,
-            langPrefix: 'hljs language-',
-            breaks: true,
-            gfm: true
-        });
+        marked.setOptions({ highlight: (code, lang) => lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : hljs.highlightAuto(code).value, langPrefix: 'hljs language-', breaks: true, gfm: true });
 
         // Theme
         function applyTheme(dark) {
@@ -524,29 +281,38 @@
         }
 
         // Helpers
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         function showToast(message, type = 'info') {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
-
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.innerHTML = `
                 <svg class="w-4 h-4 ${type === 'error' ? 'text-red-500' : 'text-green-500'}" fill="currentColor" viewBox="0 0 20 20">
-                    ${type === 'error' 
-                        ? '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />'
-                        : '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />'
-                    }
+                    ${type === 'error' ? '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />' : '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />'}
                 </svg>
                 ${message}
             `;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getActiveProvider() { return state.providers.find(p => p.id === state.activeProviderId) || state.providers[0]; }
+
+        function renderProviderUI() {
+            const p = getActiveProvider();
+            if (!p) return;
+            dom.providerIcon.textContent = p.icon || '🔗';
+            dom.providerName.textContent = p.name;
+            dom.footerProvider.textContent = p.name;
+            dom.modelBadge.textContent = state.selectedModel.split('/').pop();
+            dom.apiKeyInput.value = state.apiKeys[p.id] || '';
+            dom.apiKeyInput.placeholder = p.auth ? 'sk-...' : 'Not required';
+
+            dom.providerSelect.innerHTML = '';
+            state.providers.forEach(pr => {
+                const opt = document.createElement('option'); opt.value = pr.id; opt.textContent = pr.name; opt.selected = pr.id === state.activeProviderId;
+                dom.providerSelect.appendChild(opt);
+            });
         }
 
         // Render Messages
@@ -571,24 +337,15 @@
                 content.className = 'markdown-body';
                 content.innerHTML = DOMPurify.sanitize(marked.parse(msg.content || ''));
                 
-                // Add copy buttons to code blocks
                 content.querySelectorAll('pre code').forEach(block => {
                     hljs.highlightElement(block);
                     const pre = block.parentElement;
-                    const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
-                    
-                    const header = document.createElement('div');
-                    header.className = 'code-header';
-                    header.innerHTML = `
-                        <span>${lang}</span>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Copy
-                        </button>
-                    `;
-                    pre.insertBefore(header, pre.firstChild);
+                    if (!pre.querySelector('.code-header')) {
+                        const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
+                        const header = document.createElement('div'); header.className = 'code-header';
+                        header.innerHTML = `<span>${lang}</span><button class="copy-code-btn" onclick="copyCode(this)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>`;
+                        pre.insertBefore(header, pre.firstChild);
+                    }
                 });
 
                 bubble.appendChild(content);
@@ -607,7 +364,7 @@
                             localStorage.setItem('selectedModel', state.selectedModel);
                             openSettings();
                             renderModelList();
-                            showToast(`Model: ${msg.model.split('/').pop()}`);
+                            showToast(`Using: ${msg.model.split('/').pop()}`);
                         });
                         meta.appendChild(badge);
                     }
@@ -643,61 +400,67 @@
             const lastBubble = dom.chatContent.querySelector('.message-enter:last-child .markdown-body');
             if (lastBubble) {
                 lastBubble.innerHTML = DOMPurify.sanitize(marked.parse(content || ''));
-                lastBubble.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
-                
-                // Add copy buttons to new code blocks
                 lastBubble.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
                     if (!block.parentElement.querySelector('.code-header')) {
                         const pre = block.parentElement;
                         const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
                         const header = document.createElement('div');
                         header.className = 'code-header';
-                        header.innerHTML = `
-                            <span>${lang}</span>
-                            <button class="copy-code-btn" onclick="copyCode(this)">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                Copy
-                            </button>
-                        `;
+                        header.innerHTML = `<span>${lang}</span><button class="copy-code-btn" onclick="copyCode(this)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>`;
                         pre.insertBefore(header, pre.firstChild);
                     }
                 });
-                
                 scrollToBottom();
             }
         }
 
-        function scrollToBottom() {
-            dom.chatContainer.scrollTop = dom.chatContainer.scrollHeight;
-        }
-
-        // Typing Indicator
-        function showTyping() {
-            const wrapper = document.createElement('div');
-            wrapper.id = 'typing-indicator';
-            wrapper.className = 'flex justify-start message-enter';
-            wrapper.innerHTML = `
-                <div class="bg-[rgb(var(--bg-secondary))] rounded-2xl rounded-bl-sm px-4 py-3 border border-[rgb(var(--border))] shadow-sm flex items-center gap-1.5">
-                    <span class="pulse-dot"></span>
-                    <span class="text-xs text-[rgb(var(--text-muted))]">AI is thinking...</span>
-                </div>
-            `;
-            dom.chatContent.appendChild(wrapper);
-            scrollToBottom();
-        }
-
-        function removeTyping() {
-            document.getElementById('typing-indicator')?.remove();
-        }
+        function scrollToBottom() { dom.chatContainer.scrollTop = dom.chatContainer.scrollHeight; }
 
         // Save
         function saveChat() {
             clearTimeout(state.saveTimer);
-            state.saveTimer = setTimeout(() => {
-                localStorage.setItem('chatHistory', JSON.stringify(state.history));
-            }, 300);
+            state.saveTimer = setTimeout(() => localStorage.setItem('chatHistory', JSON.stringify(state.history)), 300);
+        }
+
+        // Fetch Models
+        async function fetchModels() {
+            const p = getActiveProvider();
+            if (!p) return;
+            dom.modelList.innerHTML = '<div class="p-2 skeleton h-8 w-full"></div>';
+            try {
+                const url = p.modelPath ? `${p.baseUrl}${p.modelPath}` : null;
+                if (!url) throw new Error('No model endpoint');
+                const headers = {};
+                if (p.auth) headers['Authorization'] = `${p.auth} ${state.apiKeys[p.id] || ''}`;
+                const res = await fetch(url, { headers });
+                if (!res.ok) throw new Error(res.status);
+                const data = await res.json();
+                state.models = (data.data || []).map(m => ({ id: m.id, name: m.name || m.id })).slice(0, 50);
+                if (state.models.length === 0) throw new Error('No models');
+            } catch {
+                state.models = [{ id: state.selectedModel || 'default-model', name: state.selectedModel || 'Enter model manually' }];
+            }
+            renderModelList();
+        }
+
+        function renderModelList() {
+            const term = dom.modelSearch.value.toLowerCase();
+            const filtered = state.models.filter(m => (m.name || m.id).toLowerCase().includes(term));
+            dom.modelList.innerHTML = '';
+            if (filtered.length === 0) { dom.modelList.innerHTML = '<div class="p-2 text-xs text-[rgb(var(--text-muted))] text-center">No models found</div>'; return; }
+            filtered.forEach(m => {
+                const item = document.createElement('div');
+                item.className = `p-2.5 flex items-center justify-between cursor-pointer hover:bg-[rgb(var(--bg-tertiary))] transition-colors text-sm ${state.selectedModel === m.id ? 'bg-blue-500/10 text-blue-500' : ''}`;
+                item.innerHTML = `<span class="truncate">${m.name}</span>${state.selectedModel === m.id ? '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' : ''}`;
+                item.addEventListener('click', () => {
+                    state.selectedModel = m.id;
+                    localStorage.setItem('selectedModel', m.id);
+                    renderModelList();
+                    showToast(`Using: ${m.name}`);
+                });
+                dom.modelList.appendChild(item);
+            });
         }
 
         // Send Message
@@ -705,9 +468,9 @@
             const text = dom.userInput.value.trim();
             if (!text || state.generating) return;
 
-            if (!state.apiKey) {
-                dom.apiKeyError.textContent = 'Please add your API key in Settings ⚙️';
-                dom.apiKeyError.classList.remove('hidden');
+            const p = getActiveProvider();
+            if (p.auth && !state.apiKeys[p.id]) {
+                showToast('API key required for ' + p.name, 'error');
                 openSettings();
                 return;
             }
@@ -717,24 +480,16 @@
             localStorage.setItem('chatHistory', JSON.stringify(state.history));
             dom.userInput.value = '';
             dom.userInput.style.height = 'auto';
-            
             dom.welcomeScreen.style.display = 'none';
             renderChat();
 
             // Prepare assistant message
             state.history.push({ role: 'assistant', content: '', model: state.selectedModel });
             
-            // Add placeholder message
+            // Add placeholder
             const placeholder = document.createElement('div');
             placeholder.className = 'flex justify-start message-enter';
-            placeholder.innerHTML = `
-                <div class="max-w-[85%] bg-[rgb(var(--bg-secondary))] rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgb(var(--border))]">
-                    <div class="markdown-body text-[rgb(var(--text-muted))]">
-                        <div class="skeleton h-4 w-3/4 mb-2"></div>
-                        <div class="skeleton h-4 w-1/2"></div>
-                    </div>
-                </div>
-            `;
+            placeholder.innerHTML = `<div class="max-w-[85%] bg-[rgb(var(--bg-secondary))] rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgb(var(--border))"><div class="markdown-body text-[rgb(var(--text-muted))]"><div class="skeleton h-4 w-3/4 mb-2"></div><div class="skeleton h-4 w-1/2"></div></div></div>`;
             dom.chatContent.appendChild(placeholder);
             scrollToBottom();
 
@@ -747,31 +502,26 @@
             state.controller = new AbortController();
 
             try {
-                const response = await fetch(API_URL, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (p.auth) headers['Authorization'] = `${p.auth} ${state.apiKeys[p.id] || ''}`;
+                if (p.id === 'openrouter') {
+                    headers['HTTP-Referer'] = window.location.origin;
+                    headers['X-Title'] = 'AI Chat';
+                }
+
+                const response = await fetch(`${p.baseUrl}/chat/completions`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${state.apiKey}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.origin,
-                        'X-Title': 'AI Chat'
-                    },
+                    headers,
                     body: JSON.stringify({
                         model: state.selectedModel,
-                        messages: [
-                            { role: 'system', content: state.systemPrompt },
-                            ...state.history.slice(0, -1).map(m => ({ role: m.role, content: m.content }))
-                        ],
+                        messages: [{ role: 'system', content: state.systemPrompt }, ...state.history.slice(0, -1)],
                         stream: true
                     }),
                     signal: state.controller.signal
                 });
 
                 if (!response.ok) {
-                    throw new Error(
-                        response.status === 401 ? 'Invalid API key' :
-                        response.status === 429 ? 'Rate limit reached. Wait ~1 minute.' :
-                        `API error (${response.status})`
-                    );
+                    throw new Error(response.status === 401 ? 'Invalid API key' : response.status === 429 ? 'Rate limit reached. Wait ~1 minute.' : `API error (${response.status})`);
                 }
 
                 const reader = response.body.getReader();
@@ -784,7 +534,7 @@
 
                     const chunk = decoder.decode(value, { stream: true });
                     chunk.split('\n').filter(l => l.trim()).forEach(line => {
-                        if (!line.startsWith('data:')) return;
+                        if (!line.startsWith('')) return;
                         const data = line.substring(5).trim();
                         if (data === '[DONE]') return;
 
@@ -827,7 +577,7 @@
             sendMessage();
         }
 
-        function copyCode(btn) {
+        window.copyCode = function(btn) {
             const pre = btn.closest('pre');
             const code = pre.querySelector('code').textContent;
             navigator.clipboard.writeText(code);
@@ -835,64 +585,14 @@
             setTimeout(() => {
                 btn.innerHTML = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy';
             }, 1500);
-        }
-
-        // Fetch Models
-        async function fetchModels() {
-            dom.modelList.innerHTML = '<div class="p-2 skeleton h-8 w-full"></div>';
-            try {
-                const res = await fetch('https://openrouter.ai/api/v1/models', {
-                    headers: { 'Authorization': `Bearer ${state.apiKey}` }
-                });
-                if (!res.ok) throw new Error('Failed');
-                
-                const data = await res.json();
-                state.models = data.data.filter(m => m.pricing?.prompt === 0 && m.pricing?.completion === 0)
-                    .sort((a, b) => a.id.localeCompare(b.id))
-                    .slice(0, 30);
-                    
-                if (state.models.length === 0) throw new Error('No free models');
-            } catch {
-                state.models = FALLBACK_MODELS;
-            }
-            renderModelList();
-        }
-
-        function renderModelList() {
-            const term = dom.modelSearch.value.toLowerCase();
-            const filtered = state.models.filter(m => (m.name || m.id).toLowerCase().includes(term));
-            
-            dom.modelList.innerHTML = '';
-            if (filtered.length === 0) {
-                dom.modelList.innerHTML = '<div class="p-2 text-xs text-[rgb(var(--text-muted))] text-center">No models found</div>';
-                return;
-            }
-
-            filtered.forEach(m => {
-                const item = document.createElement('div');
-                item.className = `p-2.5 flex items-center justify-between cursor-pointer hover:bg-[rgb(var(--bg-tertiary))] transition-colors text-sm ${
-                    state.selectedModel === m.id ? 'bg-blue-500/10 text-blue-500' : ''
-                }`;
-                item.innerHTML = `
-                    <span class="truncate">${m.name || m.id}</span>
-                    ${state.selectedModel === m.id ? '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' : ''}
-                `;
-                item.addEventListener('click', () => {
-                    state.selectedModel = m.id;
-                    localStorage.setItem('selectedModel', m.id);
-                    renderModelList();
-                    showToast(`Using ${m.name || m.id}`);
-                });
-                dom.modelList.appendChild(item);
-            });
-        }
+        };
 
         // Modal
         function openSettings() {
             state.lastFocus = document.activeElement;
             dom.modalSettings.classList.remove('hidden');
             dom.modalSettings.classList.add('flex');
-            dom.apiKeyInput.value = state.apiKey;
+            renderProviderUI();
             dom.systemPromptInput.value = state.systemPrompt;
             dom.modelSearch.value = '';
             renderModelList();
@@ -908,10 +608,7 @@
         // Events
         dom.btnSend.addEventListener('click', sendMessage);
         dom.userInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
 
         dom.userInput.addEventListener('input', () => {
@@ -922,21 +619,25 @@
         dom.btnTheme.addEventListener('click', () => applyTheme(!state.isDark));
         dom.btnSettings.addEventListener('click', openSettings);
         dom.btnCloseModal.addEventListener('click', closeSettings);
-        dom.modalSettings.addEventListener('click', e => {
-            if (e.target === dom.modalSettings) closeSettings();
+        dom.modalSettings.addEventListener('click', e => { if (e.target === dom.modalSettings) closeSettings(); });
+        dom.providerBtn.addEventListener('click', openSettings);
+
+        dom.providerSelect.addEventListener('change', () => {
+            state.activeProviderId = dom.providerSelect.value;
+            localStorage.setItem('activeProvider', state.activeProviderId);
+            renderProviderUI();
+            fetchModels();
         });
 
         dom.apiKeyInput.addEventListener('input', () => {
             const key = dom.apiKeyInput.value.trim();
-            state.apiKey = key;
-            localStorage.setItem('apiKey', key);
+            state.apiKeys[state.activeProviderId] = key;
+            localStorage.setItem('apiKeys', JSON.stringify(state.apiKeys));
             dom.apiKeyError.classList.add('hidden');
             if (key && key.length > 5) fetchModels();
         });
 
-        dom.btnToggleKey.addEventListener('click', () => {
-            dom.apiKeyInput.type = dom.apiKeyInput.type === 'password' ? 'text' : 'password';
-        });
+        dom.btnToggleKey.addEventListener('click', () => dom.apiKeyInput.type = dom.apiKeyInput.type === 'password' ? 'text' : 'password');
 
         dom.systemPromptInput.addEventListener('change', () => {
             state.systemPrompt = dom.systemPromptInput.value;
@@ -958,6 +659,7 @@
 
         dom.modelSearch.addEventListener('input', renderModelList);
         dom.btnRefreshModels.addEventListener('click', fetchModels);
+
         dom.btnNewChat.addEventListener('click', () => {
             if (state.history.length > 0 && confirm('Start new chat?')) {
                 state.history = [];
@@ -966,6 +668,7 @@
                 showToast('New chat started');
             }
         });
+
         dom.btnClearHistory.addEventListener('click', () => {
             if (confirm('Clear all history?')) {
                 state.history = [];
@@ -975,22 +678,60 @@
                 showToast('History cleared');
             }
         });
-        dom.btnStop.addEventListener('click', () => {
-            if (state.controller) state.controller.abort();
+
+        dom.btnStop.addEventListener('click', () => { if (state.controller) state.controller.abort(); });
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+
+        // Custom Provider Modal
+        dom.btnAddProvider.addEventListener('click', () => {
+            dom.modalProvider.classList.remove('hidden');
+            dom.modalProvider.classList.add('flex');
         });
 
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeSettings();
+        function closeProviderModal() {
+            dom.modalProvider.classList.add('hidden');
+            dom.modalProvider.classList.remove('flex');
+        }
+
+        dom.btnCancelCp.addEventListener('click', closeProviderModal);
+        dom.modalProvider.addEventListener('click', e => { if (e.target === dom.modalProvider) closeProviderModal(); });
+
+        dom.btnSaveCp.addEventListener('click', () => {
+            const name = dom.cpName.value.trim();
+            const baseUrl = dom.cpBaseurl.value.trim().replace(/\/+$/, '');
+            const modelPath = dom.cpModelpath.value.trim() || '/models';
+            const auth = dom.cpAuth.value === 'None' ? null : 'Bearer';
+            const icon = dom.cpIcon.value.trim() || '🔗';
+
+            if (!name || !baseUrl) {
+                showToast('Name & Base URL required', 'error');
+                return;
+            }
+
+            const id = 'custom_' + Date.now();
+            state.providers.push({ id, name, baseUrl, modelPath, auth, icon });
+            localStorage.setItem('providers', JSON.stringify(state.providers));
+
+            closeProviderModal();
+            state.activeProviderId = id;
+            localStorage.setItem('activeProvider', id);
+            renderProviderUI();
+            fetchModels();
+            showToast(`Added: ${name}`);
+
+            dom.cpName.value = '';
+            dom.cpBaseurl.value = '';
+            dom.cpModelpath.value = '';
+            dom.cpIcon.value = '';
         });
 
         // Init
         applyTheme(state.isDark);
+        renderProviderUI();
         renderChat();
-        if (state.apiKey) fetchModels();
-        
-        if (state.history.length === 0) {
-            setTimeout(() => dom.userInput.focus(), 100);
-        }
+        if (state.apiKeys[state.activeProviderId]) fetchModels();
+        if (state.history.length === 0) setTimeout(() => dom.userInput.focus(), 100);
     </script>
 </body>
 </html>
