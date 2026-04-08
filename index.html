@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQUkgQ2hhdCBQcm8iLCJzaG9ydF9uYW1lIjoiQUkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZhZmFmYSIsInRoZW1lX2NvbG9yIjoiIzNiODJmNiJ9">
+    <link rel="manifest" href="application/manifest+json;base64,eyJuYW1lIjoiQUkgQ2hhdCBQcm8iLCJzaG9ydF9uYW1lIjoiQUkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZhZmFmYSIsInRoZW1lX2NvbG9yIjoiIzNiODJmNiJ9">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -440,7 +440,7 @@
             dom.welcomeScreen.style.display = state.history.length === 0 ? 'flex' : 'none';
 
             state.history.forEach((msg, i) => {
-                if (msg.role === 'system') return; // Don't render system prompts
+                if (msg.role === 'system') return;
                 const isUser = msg.role === 'user';
                 const wrapper = document.createElement('div');
                 wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} message-enter`;
@@ -738,7 +738,7 @@
 
             // Add user message
             state.history.push({ role: 'user', content: text });
-            localStorage.setItem('chatHistory', LZString.compress(JSON.stringify(state.history)));
+            saveChat();
             dom.userInput.value = '';
             dom.userInput.style.height = 'auto';
             dom.welcomeScreen.style.display = 'none';
@@ -763,6 +763,8 @@
 
             state.controller = new AbortController();
 
+            let result = ''; // MOVED OUTSIDE TRY BLOCK TO PREVENT REFERENCE ERROR IN CATCH
+
             try {
                 const headers = { 'Content-Type': 'application/json' };
                 if (p.auth) headers['Authorization'] = `${p.auth} ${state.apiKeys[p.id] || ''}`;
@@ -785,7 +787,6 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let result = '';
                 let lastWordCount = 0;
 
                 while (true) {
@@ -803,7 +804,6 @@
                             const content = parsed.choices?.[0]?.delta?.content;
                             if (content) {
                                 result += content;
-                                // Track words for typing speed
                                 const currentWords = result.split(/\s+/).length;
                                 state.wordsTyped += (currentWords - lastWordCount);
                                 lastWordCount = currentWords;
@@ -812,10 +812,13 @@
                                 updateLastMessage(result);
                                 saveChat();
                             }
-                        } catch (e) {}
+                        } catch (e) {
+                            console.error('Stream parse error:', e);
+                        }
                     });
                 }
             } catch (err) {
+                console.error('Fetch error:', err);
                 // Auto-failover
                 if (err.message.includes('429') && attempts < 3) {
                     const providersWithKeys = state.providers.filter(pr => !pr.auth || state.apiKeys[pr.id]);
@@ -834,14 +837,14 @@
                     }
                 }
 
-                if (err.name !== 'AbortError') {
-                    state.history[state.history.length - 1].content = `⚠️ ${err.message}`;
-                    updateLastMessage(`⚠️ ${err.message}`);
-                    showToast(err.message, 'error');
-                } else {
+                if (err.name === 'AbortError') {
                     state.history[state.history.length - 1].content = result || '⚠️ Generation stopped.';
                     updateLastMessage(state.history[state.history.length - 1].content);
                     showToast('Generation stopped');
+                } else {
+                    state.history[state.history.length - 1].content = `⚠️ ${err.message}`;
+                    updateLastMessage(`⚠️ ${err.message}`);
+                    showToast(err.message, 'error');
                 }
             } finally {
                 state.generating = false;
@@ -859,13 +862,11 @@
             const msg = state.history[index];
             if (!msg || msg.role !== 'assistant' || state.generating) return;
 
-            // Find previous user message
             let userIndex = index - 1;
             while (userIndex >= 0 && state.history[userIndex].role !== 'user') userIndex--;
             if (userIndex < 0) return;
 
             const userText = state.history[userIndex].content;
-            // Remove current assistant response
             state.history.splice(index, 1);
             saveChat();
             renderChat();
