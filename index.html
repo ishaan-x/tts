@@ -8,11 +8,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>AI Chat Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- FIX: Pin marked to a specific stable version to prevent silent breaking changes -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
-    <link rel="manifest" href="application/manifest+json;base64,eyJuYW1lIjoiQUkgQ2hhdCBQcm8iLCJzaG9ydF9uYW1lIjoiQUkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZhZmFmYSIsInRoZW1lX2NvbG9yIjoiIzNiODJmNiJ9">
+    <!-- FIX #1: Added required "data:" URI scheme prefix — manifest was silently ignored before -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQUkgQ2hhdCBQcm8iLCJzaG9ydF9uYW1lIjoiQUkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZhZmFmYSIsInRoZW1lX2NvbG9yIjoiIzNiODJmNiJ9">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -84,6 +86,11 @@
         .provider-badge:hover { border-color: rgb(var(--accent)); color: rgb(var(--accent)); }
         .search-highlight { background: rgba(var(--accent), 0.3); padding: 2px 4px; border-radius: 3px; }
         .typing-speed { font-size: 10px; color: rgb(var(--text-muted)); margin-left: 8px; }
+        /* UPGRADE: Timestamp style */
+        .msg-timestamp { font-size: 10px; color: rgb(var(--text-muted)); opacity: 0.7; margin-top: 4px; }
+        /* UPGRADE: Character counter */
+        .char-counter { font-size: 11px; color: rgb(var(--text-muted)); transition: color 0.2s; }
+        .char-counter.warn { color: rgb(var(--error)); }
     </style>
 </head>
 <body>
@@ -157,16 +164,18 @@
         <footer class="px-4 py-3 border-t border-[rgb(var(--border))] bg-[rgb(var(--bg))]/80 backdrop-blur-md">
             <div class="max-w-4xl mx-auto">
                 <div class="relative bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border))] rounded-2xl overflow-hidden focus-within:border-[rgb(var(--accent))] focus-within:shadow-sm transition-all">
-                    <textarea id="user-input" rows="1" class="w-full px-4 py-3 bg-transparent resize-none outline-none text-[15px] leading-relaxed max-h-[160px]" placeholder="Message AI... (Ctrl+Enter to send)" aria-label="Message input"></textarea>
+                    <textarea id="user-input" rows="1" class="w-full px-4 py-3 bg-transparent resize-none outline-none text-[15px] leading-relaxed max-h-[160px]" placeholder="Message AI… (Enter or Ctrl+Enter to send)" aria-label="Message input"></textarea>
                     <div class="flex items-center justify-between px-3 py-2 border-t border-[rgb(var(--border))] bg-[rgb(var(--bg-secondary))]">
                         <div class="flex items-center gap-2 text-xs text-[rgb(var(--text-muted))]">
                             <span class="bg-[rgb(var(--bg-tertiary))] px-2 py-0.5 rounded" id="footer-provider">OpenRouter</span>
+                            <!-- UPGRADE: Character counter -->
+                            <span id="char-counter" class="char-counter"></span>
                         </div>
                         <div class="flex items-center gap-1">
                             <button id="btn-stop" class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 btn-hover hidden" title="Stop generating (Esc)">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>
                             </button>
-                            <button id="btn-send" class="p-2 rounded-lg bg-[rgb(var(--accent))] text-white hover:bg-[rgb(var(--accent-hover))] btn-hover" title="Send message (Ctrl+Enter)">
+                            <button id="btn-send" class="p-2 rounded-lg bg-[rgb(var(--accent))] text-white hover:bg-[rgb(var(--accent-hover))] btn-hover" title="Send message (Enter)">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                             </button>
                         </div>
@@ -283,7 +292,7 @@
     </div>
 
     <script>
-        // PWA Service Worker (inline)
+        // PWA Service Worker (inline, best-effort)
         if ('serviceWorker' in navigator) {
             const swCode = `self.addEventListener('install', e => e.waitUntil(caches.open('ai-chat-v1').then(c => c.addAll(['/']))));self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));`;
             const blob = new Blob([swCode], { type: 'application/javascript' });
@@ -293,11 +302,11 @@
         // Provider Registry
         const BUILTIN_PROVIDERS = [
             { id: 'openrouter', name: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', modelPath: '/models', auth: 'Bearer', icon: '🌐' },
-            { id: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', modelPath: '/models', auth: 'Bearer', icon: '🔷' },
-            { id: 'groq', name: 'Groq', baseUrl: 'https://api.groq.com/openai/v1', modelPath: '/models', auth: 'Bearer', icon: '⚡' },
-            { id: 'together', name: 'Together AI', baseUrl: 'https://api.together.xyz/v1', modelPath: '/models', auth: 'Bearer', icon: '🔶' },
-            { id: 'ollama', name: 'Ollama (Local)', baseUrl: 'http://localhost:11434/v1', modelPath: null, auth: null, icon: '🦙' },
-            { id: 'lmstudio', name: 'LM Studio', baseUrl: 'http://localhost:1234/v1', modelPath: '/models', auth: null, icon: '🛠️' }
+            { id: 'openai',     name: 'OpenAI',      baseUrl: 'https://api.openai.com/v1',     modelPath: '/models', auth: 'Bearer', icon: '🔷' },
+            { id: 'groq',       name: 'Groq',         baseUrl: 'https://api.groq.com/openai/v1', modelPath: '/models', auth: 'Bearer', icon: '⚡' },
+            { id: 'together',   name: 'Together AI',  baseUrl: 'https://api.together.xyz/v1',   modelPath: '/models', auth: 'Bearer', icon: '🔶' },
+            { id: 'ollama',     name: 'Ollama (Local)', baseUrl: 'http://localhost:11434/v1',   modelPath: null,       auth: null,     icon: '🦙' },
+            { id: 'lmstudio',  name: 'LM Studio',    baseUrl: 'http://localhost:1234/v1',       modelPath: '/models', auth: null,     icon: '🛠️' }
         ];
 
         // State
@@ -325,7 +334,7 @@
         try {
             const compressed = localStorage.getItem('chatHistory');
             if (compressed) {
-                if (compressed.startsWith('{')) {
+                if (compressed.startsWith('{') || compressed.startsWith('[')) {
                     state.history = JSON.parse(compressed);
                 } else {
                     state.history = JSON.parse(LZString.decompress(compressed));
@@ -358,16 +367,28 @@
             cpModelpath: document.getElementById('cp-modelpath'), cpAuth: document.getElementById('cp-auth'),
             cpIcon: document.getElementById('cp-icon'), btnCancelCp: document.getElementById('btn-cancel-cp'),
             btnSaveCp: document.getElementById('btn-save-cp'), modalExport: document.getElementById('modal-export'),
-            exportJson: document.getElementById('export-json'), exportMarkdown: document.getElementById('export-markdown')
+            exportJson: document.getElementById('export-json'), exportMarkdown: document.getElementById('export-markdown'),
+            charCounter: document.getElementById('char-counter')
         };
 
-        marked.setOptions({ highlight: (code, lang) => lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : hljs.highlightAuto(code).value, langPrefix: 'hljs language-', breaks: true, gfm: true });
+        // FIX: Use marked.use() instead of deprecated marked.setOptions({highlight}) removed in marked v5+
+        marked.use({
+            mangle: false,
+            headerIds: false,
+            breaks: true,
+            gfm: true,
+            renderer: (() => {
+                const renderer = new marked.Renderer();
+                // Preserve default code rendering; hljs applied after DOM insertion
+                return renderer;
+            })()
+        });
 
         // Theme & UI
         function applyTheme(dark) {
             state.isDark = dark;
             document.documentElement.classList.toggle('dark', dark);
-            dom.iconTheme.innerHTML = dark 
+            dom.iconTheme.innerHTML = dark
                 ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />'
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
             localStorage.setItem('darkMode', dark);
@@ -391,7 +412,9 @@
             toast.className = 'toast';
             toast.innerHTML = `
                 <svg class="w-4 h-4 ${type === 'error' ? 'text-red-500' : 'text-green-500'}" fill="currentColor" viewBox="0 0 20 20">
-                    ${type === 'error' ? '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />' : '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />'}
+                    ${type === 'error'
+                        ? '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />'
+                        : '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />'}
                 </svg>
                 ${message}
             `;
@@ -407,13 +430,16 @@
             dom.providerIcon.textContent = p.icon || '🔗';
             dom.providerName.textContent = p.name;
             dom.footerProvider.textContent = p.name;
-            dom.modelBadge.textContent = state.selectedModel.split('/').pop();
+            // UPGRADE: Graceful fallback when model has no slash
+            const modelLabel = state.selectedModel.includes('/') ? state.selectedModel.split('/').pop() : state.selectedModel;
+            dom.modelBadge.textContent = modelLabel;
             dom.apiKeyInput.value = state.apiKeys[p.id] || '';
             dom.apiKeyInput.placeholder = p.auth ? 'sk-...' : 'Not required';
 
             dom.providerSelect.innerHTML = '';
             state.providers.forEach(pr => {
-                const opt = document.createElement('option'); opt.value = pr.id; opt.textContent = pr.name; opt.selected = pr.id === state.activeProviderId;
+                const opt = document.createElement('option');
+                opt.value = pr.id; opt.textContent = pr.name; opt.selected = pr.id === state.activeProviderId;
                 dom.providerSelect.appendChild(opt);
             });
         }
@@ -423,15 +449,36 @@
             let tokens = 0;
             const trimmed = [];
             const systemMsgs = messages.filter(m => m.role === 'system');
-            const recentMsgs = messages.filter(m => m.role !== 'system').slice(-10); // Keep last 10
-            
+            const recentMsgs = messages.filter(m => m.role !== 'system').slice(-10);
+
             for (let i = recentMsgs.length - 1; i >= 0; i--) {
                 tokens += Math.ceil((recentMsgs[i].content?.length || 0) / 4);
                 if (tokens > maxTokens) break;
                 trimmed.unshift(recentMsgs[i]);
             }
-            
             return [...systemMsgs, ...trimmed];
+        }
+
+        // UPGRADE: Format timestamp for display
+        function formatTime(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Helper: apply hljs + code headers to a container
+        function applyCodeHighlighting(container) {
+            container.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+                const pre = block.parentElement;
+                if (!pre.querySelector('.code-header')) {
+                    const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
+                    const header = document.createElement('div');
+                    header.className = 'code-header';
+                    header.innerHTML = `<span>${lang}</span><button class="copy-code-btn" onclick="copyCode(this)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>`;
+                    pre.insertBefore(header, pre.firstChild);
+                }
+            });
         }
 
         // Render Messages
@@ -456,19 +503,16 @@
                 const content = document.createElement('div');
                 content.className = 'markdown-body';
                 content.innerHTML = DOMPurify.sanitize(marked.parse(msg.content || ''));
-                
-                content.querySelectorAll('pre code').forEach(block => {
-                    hljs.highlightElement(block);
-                    const pre = block.parentElement;
-                    if (!pre.querySelector('.code-header')) {
-                        const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
-                        const header = document.createElement('div'); header.className = 'code-header';
-                        header.innerHTML = `<span>${lang}</span><button class="copy-code-btn" onclick="copyCode(this)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>`;
-                        pre.insertBefore(header, pre.firstChild);
-                    }
-                });
-
+                applyCodeHighlighting(content);
                 bubble.appendChild(content);
+
+                // UPGRADE: Timestamp display
+                if (msg.timestamp) {
+                    const ts = document.createElement('div');
+                    ts.className = `msg-timestamp ${isUser ? 'text-right text-white/60' : ''}`;
+                    ts.textContent = formatTime(msg.timestamp);
+                    bubble.appendChild(ts);
+                }
 
                 if (!isUser) {
                     const meta = document.createElement('div');
@@ -477,29 +521,34 @@
                     if (msg.model) {
                         const badge = document.createElement('button');
                         badge.className = 'inline-flex items-center gap-1 px-2 py-1 bg-[rgb(var(--bg-tertiary))] rounded-full text-xs font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 transition-colors';
-                        badge.innerHTML = `<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg> ${msg.model.split('/').pop()}`;
+                        const modelShort = msg.model.includes('/') ? msg.model.split('/').pop() : msg.model;
+                        badge.innerHTML = `<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg> ${modelShort}`;
                         badge.title = 'Use this model';
                         badge.addEventListener('click', () => {
                             state.selectedModel = msg.model;
                             localStorage.setItem('selectedModel', state.selectedModel);
                             openSettings();
                             renderModelList();
-                            showToast(`Using: ${msg.model.split('/').pop()}`);
+                            showToast(`Using: ${modelShort}`);
                         });
                         meta.appendChild(badge);
                     }
 
                     const actions = document.createElement('div');
                     actions.className = 'flex gap-1';
-                    
+
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'p-1.5 rounded hover:bg-[rgb(var(--bg-tertiary))] transition-colors';
                     copyBtn.title = 'Copy message';
                     copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
                     copyBtn.addEventListener('click', async () => {
-                        await navigator.clipboard.writeText(msg.content);
-                        copyBtn.innerHTML = '<svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
-                        setTimeout(() => { copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>'; }, 1500);
+                        try {
+                            await navigator.clipboard.writeText(msg.content);
+                            copyBtn.innerHTML = '<svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
+                            setTimeout(() => { copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>'; }, 1500);
+                        } catch {
+                            showToast('Clipboard unavailable', 'error');
+                        }
                     });
                     actions.appendChild(copyBtn);
 
@@ -509,7 +558,7 @@
                     regenBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>';
                     regenBtn.addEventListener('click', () => regenerateResponse(i));
                     actions.appendChild(regenBtn);
-                    
+
                     meta.appendChild(actions);
                     bubble.appendChild(meta);
                 }
@@ -525,16 +574,7 @@
             const lastBubble = dom.chatContent.querySelector('.message-enter:last-child .markdown-body');
             if (lastBubble) {
                 lastBubble.innerHTML = DOMPurify.sanitize(marked.parse(content || ''));
-                lastBubble.querySelectorAll('pre code').forEach(block => {
-                    hljs.highlightElement(block);
-                    if (!block.parentElement.querySelector('.code-header')) {
-                        const pre = block.parentElement;
-                        const lang = block.className.match(/language-(\w+)/)?.[1] || 'text';
-                        const header = document.createElement('div'); header.className = 'code-header';
-                        header.innerHTML = `<span>${lang}</span><button class="copy-code-btn" onclick="copyCode(this)"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>`;
-                        pre.insertBefore(header, pre.firstChild);
-                    }
-                });
+                applyCodeHighlighting(lastBubble);
                 scrollToBottom();
             }
         }
@@ -548,7 +588,8 @@
             dom.typingSpeed.classList.remove('hidden');
             state.typingSpeed = setInterval(() => {
                 const elapsed = (Date.now() - state.startTime) / 60000; // minutes
-                const wpm = Math.round(state.wordsTyped / elapsed) || 0;
+                // FIX #6: Guard against division by zero / near-zero elapsed giving Infinity wpm
+                const wpm = elapsed > 0.001 ? Math.round(state.wordsTyped / elapsed) : 0;
                 dom.typingSpeed.textContent = `${wpm} wpm`;
             }, 1000);
         }
@@ -569,6 +610,10 @@
             dom.searchBar.classList.add('hidden');
             dom.searchInput.value = '';
             dom.searchCount.textContent = '';
+            clearSearchHighlights();
+        }
+
+        function clearSearchHighlights() {
             document.querySelectorAll('.search-highlight').forEach(el => {
                 const parent = el.parentNode;
                 parent.replaceChild(document.createTextNode(el.textContent), el);
@@ -576,10 +621,14 @@
             });
         }
 
+        // FIX #4: performSearch no longer calls closeSearch() — that hid the bar and wiped
+        // the count display before the user could see results. Now it only clears old highlights.
         function performSearch() {
             const query = dom.searchInput.value.toLowerCase().trim();
-            closeSearch();
-            if (!query) return;
+            if (!query) { dom.searchCount.textContent = ''; return; }
+
+            // Clear previous highlights without closing the search bar
+            clearSearchHighlights();
 
             let matchCount = 0;
             document.querySelectorAll('#chat-content .markdown-body').forEach(content => {
@@ -593,6 +642,8 @@
             if (matchCount > 0) {
                 const first = document.querySelector('.search-highlight');
                 if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                showToast('No matches found');
             }
         }
 
@@ -647,28 +698,28 @@
             });
         }
 
-        // Export/Import
+        // Export / Import
         function exportChat(format) {
             const data = {
                 meta: { exported: new Date().toISOString(), provider: getActiveProvider().name, model: state.selectedModel, version: '2.0' },
                 messages: state.history,
                 settings: { systemPrompt: state.systemPrompt, selectedModel: state.selectedModel }
             };
-            
+
             let content, filename, type;
             if (format === 'json') {
                 content = JSON.stringify(data, null, 2);
                 filename = `chat-${Date.now()}.json`;
                 type = 'application/json';
             } else {
-                content = `# AI Chat Export - ${new Date().toLocaleDateString()}\n\n` + 
-                          state.history.filter(m => m.role !== 'system').map(m => 
+                content = `# AI Chat Export — ${new Date().toLocaleDateString()}\n\n` +
+                          state.history.filter(m => m.role !== 'system').map(m =>
                             `**${m.role === 'user' ? 'You' : 'AI'}** (${m.model || 'unknown'}):\n\n${m.content}`
                           ).join('\n\n---\n\n');
                 filename = `chat-${Date.now()}.md`;
                 type = 'text/markdown';
             }
-            
+
             const blob = new Blob([content], { type });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
@@ -709,13 +760,9 @@
                 try {
                     const json = JSON.stringify(state.history);
                     const compressed = LZString.compress(json);
-                    if (compressed && compressed.length > 0) {
-                        localStorage.setItem('chatHistory', compressed);
-                    } else {
-                        localStorage.setItem('chatHistory', json);
-                    }
+                    localStorage.setItem('chatHistory', (compressed && compressed.length > 0) ? compressed : json);
                 } catch {
-                    localStorage.setItem('chatHistory', JSON.stringify(state.history));
+                    try { localStorage.setItem('chatHistory', JSON.stringify(state.history)); } catch { /* quota exceeded */ }
                 }
             }, 300);
         }
@@ -724,7 +771,6 @@
         async function sendMessage() {
             const text = dom.userInput.value.trim();
             if (!text || state.generating) return;
-
             await sendMessageCore(text);
         }
 
@@ -736,34 +782,34 @@
                 return;
             }
 
-            // Add user message
-            state.history.push({ role: 'user', content: text });
+            // Add user message with timestamp
+            state.history.push({ role: 'user', content: text, timestamp: Date.now() });
             saveChat();
             dom.userInput.value = '';
             dom.userInput.style.height = 'auto';
+            dom.charCounter.textContent = '';
             dom.welcomeScreen.style.display = 'none';
             renderChat();
 
-            // Prepare assistant message
+            // Prepare assistant message placeholder
             state.history.push({ role: 'assistant', content: '', model: state.selectedModel });
-            
-            // Add placeholder
+
+            // FIX #3: Was missing closing `]` → `border-[rgb(var(--border))]` — broken Tailwind class
             const placeholder = document.createElement('div');
             placeholder.className = 'flex justify-start message-enter';
-            placeholder.innerHTML = `<div class="max-w-[85%] bg-[rgb(var(--bg-secondary))] rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgb(var(--border))"><div class="markdown-body text-[rgb(var(--text-muted))]"><div class="skeleton h-4 w-3/4 mb-2"></div><div class="skeleton h-4 w-1/2"></div></div></div>`;
+            placeholder.innerHTML = `<div class="max-w-[85%] bg-[rgb(var(--bg-secondary))] rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgb(var(--border))]"><div class="markdown-body text-[rgb(var(--text-muted))]"><div class="skeleton h-4 w-3/4 mb-2"></div><div class="skeleton h-4 w-1/2"></div></div></div>`;
             dom.chatContent.appendChild(placeholder);
             scrollToBottom();
 
             state.generating = true;
             dom.btnStop.classList.remove('hidden');
             dom.btnSend.disabled = true;
-            dom.headerStatus.textContent = 'Generating...';
+            dom.headerStatus.textContent = 'Generating…';
             dom.headerStatus.classList.add('text-blue-500');
             startTypingSpeed();
 
             state.controller = new AbortController();
-
-            let result = ''; // MOVED OUTSIDE TRY BLOCK TO PREVENT REFERENCE ERROR IN CATCH
+            let result = '';
 
             try {
                 const headers = { 'Content-Type': 'application/json' };
@@ -782,7 +828,11 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(response.status === 401 ? 'Invalid API key' : response.status === 429 ? 'Rate limit reached. Wait ~1 minute.' : `API error (${response.status})`);
+                    throw new Error(
+                        response.status === 401 ? 'Invalid API key' :
+                        response.status === 429 ? 'Rate limit reached. Wait ~1 minute.' :
+                        `API error (${response.status})`
+                    );
                 }
 
                 const reader = response.body.getReader();
@@ -795,8 +845,10 @@
 
                     const chunk = decoder.decode(value, { stream: true });
                     chunk.split('\n').filter(l => l.trim()).forEach(line => {
-                        if (!line.startsWith('')) return;
-                        const data = line.substring(5).trim();
+                        // FIX #2: Was `startsWith('')` which is ALWAYS true — guard never fired,
+                        // so every SSE line (events, pings, blank-ish lines) hit JSON.parse.
+                        if (!line.startsWith('data: ')) return;
+                        const data = line.slice(6).trim(); // 'data: ' is 6 chars
                         if (data === '[DONE]') return;
 
                         try {
@@ -807,32 +859,36 @@
                                 const currentWords = result.split(/\s+/).length;
                                 state.wordsTyped += (currentWords - lastWordCount);
                                 lastWordCount = currentWords;
-                                
                                 state.history[state.history.length - 1].content = result;
                                 updateLastMessage(result);
                                 saveChat();
                             }
                         } catch (e) {
-                            console.error('Stream parse error:', e);
+                            // Silently ignore non-JSON SSE data lines (event:, :ping, etc.)
                         }
                     });
                 }
+
+                // Stamp assistant message with finish time
+                state.history[state.history.length - 1].timestamp = Date.now();
+
             } catch (err) {
                 console.error('Fetch error:', err);
-                // Auto-failover
-                if (err.message.includes('429') && attempts < 3) {
+
+                // FIX #5: Was `err.message.includes('429')` but the thrown message is
+                // 'Rate limit reached…' — contains no '429'. Fixed to match actual message.
+                if (err.message.includes('Rate limit') && attempts < 3) {
                     const providersWithKeys = state.providers.filter(pr => !pr.auth || state.apiKeys[pr.id]);
                     const currentIndex = providersWithKeys.findIndex(pr => pr.id === p.id);
                     const nextProvider = providersWithKeys[(currentIndex + 1) % providersWithKeys.length];
-                    
+
                     if (nextProvider && nextProvider.id !== p.id) {
                         state.activeProviderId = nextProvider.id;
                         localStorage.setItem('activeProvider', state.activeProviderId);
                         renderProviderUI();
                         showToast(`Auto-switched to ${nextProvider.name} (rate limit)`);
-                        // Retry with new provider
-                        state.history.pop(); // Remove failed assistant msg
-                        state.history.pop(); // Remove user msg to retry
+                        state.history.pop(); // Remove failed assistant placeholder
+                        state.history.pop(); // Remove user message to retry
                         return sendMessageCore(text, attempts + 1);
                     }
                 }
@@ -870,18 +926,26 @@
             state.history.splice(index, 1);
             saveChat();
             renderChat();
-            
             await sendMessageCore(userText);
         }
 
-        function useSuggestion(text) { dom.userInput.value = text; dom.userInput.focus(); sendMessage(); }
+        function useSuggestion(text) {
+            dom.userInput.value = text;
+            dom.userInput.dispatchEvent(new Event('input')); // trigger auto-resize + counter
+            dom.userInput.focus();
+            sendMessage();
+        }
 
+        // FIX: Added try-catch — clipboard.writeText rejects if permission denied or non-HTTPS
         window.copyCode = function(btn) {
             const pre = btn.closest('pre');
             const code = pre.querySelector('code').textContent;
-            navigator.clipboard.writeText(code);
-            btn.innerHTML = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-            setTimeout(() => { btn.innerHTML = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy'; }, 1500);
+            navigator.clipboard.writeText(code).then(() => {
+                btn.innerHTML = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
+                setTimeout(() => { btn.innerHTML = '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy'; }, 1500);
+            }).catch(() => {
+                showToast('Clipboard unavailable', 'error');
+            });
         };
 
         // Fetch Models
@@ -895,9 +959,9 @@
                 const headers = {};
                 if (p.auth) headers['Authorization'] = `${p.auth} ${state.apiKeys[p.id] || ''}`;
                 const res = await fetch(url, { headers });
-                if (!res.ok) throw new Error(res.status);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                state.models = (data.data || []).map(m => ({ id: m.id, name: m.name || m.id })).slice(0, 50);
+                state.models = (data.data || []).map(m => ({ id: m.id, name: m.name || m.id })).slice(0, 100);
                 if (state.models.length === 0) throw new Error('No models');
             } catch {
                 state.models = [{ id: state.selectedModel || 'default-model', name: state.selectedModel || 'Enter model manually' }];
@@ -913,12 +977,12 @@
             filtered.forEach(m => {
                 const item = document.createElement('div');
                 item.className = `p-2.5 flex items-center justify-between cursor-pointer hover:bg-[rgb(var(--bg-tertiary))] transition-colors text-sm ${state.selectedModel === m.id ? 'bg-blue-500/10 text-blue-500' : ''}`;
-                item.innerHTML = `<span class="truncate">${m.name}</span>${state.selectedModel === m.id ? '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' : ''}`;
+                item.innerHTML = `<span class="truncate">${m.name || m.id}</span>${state.selectedModel === m.id ? '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' : ''}`;
                 item.addEventListener('click', () => {
                     state.selectedModel = m.id;
                     localStorage.setItem('selectedModel', m.id);
                     renderModelList();
-                    showToast(`Using: ${m.name}`);
+                    showToast(`Using: ${m.name || m.id}`);
                 });
                 dom.modelList.appendChild(item);
             });
@@ -968,6 +1032,15 @@
         dom.userInput.addEventListener('input', () => {
             dom.userInput.style.height = 'auto';
             dom.userInput.style.height = Math.min(dom.userInput.scrollHeight, 160) + 'px';
+            // UPGRADE: Live character counter, warns at 3000+ chars
+            const len = dom.userInput.value.length;
+            if (len > 500) {
+                dom.charCounter.textContent = `${len.toLocaleString()} chars`;
+                dom.charCounter.classList.toggle('warn', len > 3000);
+            } else {
+                dom.charCounter.textContent = '';
+                dom.charCounter.classList.remove('warn');
+            }
         });
 
         dom.btnTheme.addEventListener('click', () => applyTheme(!state.isDark));
@@ -977,7 +1050,9 @@
         dom.providerBtn.addEventListener('click', openSettings);
         dom.btnSearch.addEventListener('click', openSearch);
         dom.btnCloseSearch.addEventListener('click', closeSearch);
-        dom.searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+        // UPGRADE: Search on input (live) in addition to Enter
+        dom.searchInput.addEventListener('input', performSearch);
+        dom.searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); if (e.key === 'Escape') closeSearch(); });
         dom.btnExport.addEventListener('click', openExportModal);
         dom.exportJson.addEventListener('click', () => exportChat('json'));
         dom.exportMarkdown.addEventListener('click', () => exportChat('markdown'));
@@ -1003,7 +1078,11 @@
 
         [dom.tmplHelpful, dom.tmplCreative, dom.tmplConcise].forEach((btn, idx) => {
             btn.addEventListener('click', () => {
-                const prompts = ['You are a helpful, knowledgeable, and friendly assistant. Provide clear, accurate information.', 'You are creative and imaginative. Think outside the box and provide engaging responses.', 'You are concise. Provide short, direct answers without unnecessary detail.'];
+                const prompts = [
+                    'You are a helpful, knowledgeable, and friendly assistant. Provide clear, accurate information.',
+                    'You are creative and imaginative. Think outside the box and provide engaging responses.',
+                    'You are concise. Provide short, direct answers without unnecessary detail.'
+                ];
                 dom.systemPromptInput.value = prompts[idx];
                 state.systemPrompt = prompts[idx];
                 localStorage.setItem('systemPrompt', state.systemPrompt);
@@ -1102,4 +1181,3 @@
     </script>
 </body>
 </html>
-
